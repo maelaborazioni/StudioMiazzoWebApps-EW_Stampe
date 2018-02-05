@@ -1,0 +1,9 @@
+addEmptyValue:1,
+customValues:"Tutti i dipendenti | 0\r
+Solo i dipendenti che superano il limite contrattuale | 1\r
+Solo le settimane che superano il limite contrattuale | 2",
+name:"vls_tipo_situazione_stra_mensile",
+returnDataProviders:1,
+showDataProviders:1,
+typeid:34,
+uuid:"5ED7199A-647B-4166-AFF4-C5C11B1FD5AE"

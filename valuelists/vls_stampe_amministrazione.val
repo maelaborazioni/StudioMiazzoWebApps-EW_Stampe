@@ -1,0 +1,12 @@
+addEmptyValue:1,
+customValues:"Autorizzazioni generali | 0\r
+Moduli per organizzazione | 1\r
+Chiavi per cliente | 2\r
+Informazioni utenti | 3\r
+",
+dataSource:null,
+name:"vls_stampe_amministrazione",
+returnDataProviders:1,
+showDataProviders:1,
+typeid:34,
+uuid:"6EDBBF89-4270-4D2F-9FA2-168DE5329478"

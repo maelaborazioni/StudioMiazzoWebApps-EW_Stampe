@@ -1,0 +1,15 @@
+extendsID:"-1",
+items:[
+{
+height:300,
+partType:5,
+typeid:19,
+uuid:"8EF8FA14-9073-407F-A278-C4D516E29C86"
+}
+],
+name:"stampe_opzioni_parent",
+showInMenu:true,
+size:"500,300",
+styleName:"leaf_style",
+typeid:3,
+uuid:"3C1793B0-0735-44AD-AE5B-B914E92636BA"

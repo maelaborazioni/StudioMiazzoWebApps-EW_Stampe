@@ -1,0 +1,13 @@
+dataSource:"db:/ma_anagrafiche/ditte",
+extendsID:"8C074447-00A3-4C93-84D8-D782B5E5A0BC",
+items:[
+{
+extendsID:"8EF8FA14-9073-407F-A278-C4D516E29C86",
+height:90,
+typeid:19,
+uuid:"F3F64314-0A07-4025-8FB1-D546E7283E96"
+}
+],
+name:"stampa_statistica_turni_opzioni",
+typeid:3,
+uuid:"3F7D7EA8-0629-4368-98E3-0E1DB553B880"

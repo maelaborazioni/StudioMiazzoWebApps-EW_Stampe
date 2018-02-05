@@ -1,0 +1,9 @@
+addEmptyValue:1,
+customValues:"Anagrafica | 0\r
+Elenco dipendenti | 1\r
+Elenco consegna stipendi | 2",
+name:"vls_tipo_stampa_anagrafica_dipendenti",
+returnDataProviders:1,
+showDataProviders:1,
+typeid:34,
+uuid:"840FC35F-F3A9-4891-8A69-C8FD8B40B9D2"

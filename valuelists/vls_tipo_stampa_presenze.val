@@ -1,0 +1,10 @@
+addEmptyValue:1,
+customValues:"Stampa le timbrature causalizzate | 0\r
+Stampa gli eventi in giornaliera | 1\r
+Non stampare eventi e causalizzate | 2\r
+",
+name:"vls_tipo_stampa_presenze",
+returnDataProviders:1,
+showDataProviders:1,
+typeid:34,
+uuid:"BAC26E8E-C4F0-42A2-B2BD-C72F033ED832"

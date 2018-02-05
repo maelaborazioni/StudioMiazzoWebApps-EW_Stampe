@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<buildpath>
+	<buildpathentry excluding=".stp/|medias/" kind="src" path=""/>
+	<buildpathentry exported="true" kind="prj" path="/EW_Lookup"/>
+	<buildpathentry exported="true" kind="prj" path="/EW_Shared"/>
+	<buildpathentry exported="true" kind="prj" path="/MA_Operations"/>
+	<buildpathentry exported="true" kind="prj" path="/MA_Report"/>
+	<buildpathentry exported="true" kind="prj" path="/svy_nav_navigation"/>
+	<buildpathentry exported="true" kind="prj" path="/utility"/>
+</buildpath>
