@@ -23,6 +23,7 @@ function stampaPresentiAssenti()
 	var params = forms.stampa_presenti_assenti_opzioni.getOptions();
 	    params['idgruppoinstallazione'] = -1;
 	    params['iddipendenti'] = [];
+	    //params['bexcel'] = 1;
 	    params['periodo'] = globals.toPeriodo(globals.TODAY.getFullYear(),globals.TODAY.getMonth()+1);
 	    params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
 		params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
