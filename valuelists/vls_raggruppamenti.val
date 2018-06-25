@@ -1,14 +1,5 @@
 addEmptyValue:1,
-customValues:null,
-dataProviderID1:"descrizione_calc",
-dataProviderID2:"codtipocampo",
-dataProviderID3:"codice",
-dataSource:null,
+customProperties:"lazyLoading:false",
 name:"vls_raggruppamenti",
-relationName:"ditte_to_ditte_classificazioni",
-returnDataProviders:6,
-showDataProviders:1,
 typeid:34,
-useTableFilter:false,
-uuid:"41F073DE-E3B1-42CE-AF66-6694E58410F5",
-valueListType:1
+uuid:"41F073DE-E3B1-42CE-AF66-6694E58410F5"
