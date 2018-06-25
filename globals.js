@@ -90,11 +90,12 @@ function seleziona_ditta_stampa(formName, formTitle)
 												methodToAddFoundsetFilter : 'filtraDittaControllate',
 												/*width: 660, height: 670,*/
 												dateFormat: globals.EU_DATEFORMAT })
-
-	if(idditta)
+												
+    if(idditta)
 	{
 		var form = forms[formName];
 		form.foundset.loadRecords(idditta);
+		forms.stampa_filtri_anagrafici.foundset.loadRecords(idditta);
 		azzeraFiltriAnagrafici();
 		
 		globals.ma_utl_setStatus(globals.Status.EDIT, formName);
@@ -274,6 +275,18 @@ function selezione_ditta_stampa_situazione_straordinari(event)
 function selezione_ditta_stampa_statistica_ore(event)
 {
 	seleziona_ditta_stampa(forms.stampa_statistica_ore.controller.getName(), 'Stampa statistica ore');
+}
+
+/**
+ * Mostra la selezione dei parametri per l'esportazione delle timrbature
+ * 
+ * @param {JSEvent} event
+ *
+ * @properties={typeid:24,uuid:"060BC3E0-E5FD-4B13-BC08-55231ACABDDE"}
+ */
+function selezione_ditta_stampa_esportazione_timbrature(event)
+{
+	seleziona_ditta_stampa(forms.stampa_esportazione_timbrature.controller.getName(),'Esportazione timbrature');
 }
 
 /**
@@ -544,7 +557,7 @@ function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al)
 				if(giorno >= primoGgMese && giorno <= ultimoGgMese)
 				{
 					var infoFascia = globals.ottieniInformazioniFasciaGiorno(arrLavoratori[l],giorno);
-					if(infoFascia)
+ 					if(infoFascia)
 						arrRiepFasce.push(infoFascia.codalternativo ? infoFascia.codalternativo : '');
 					else
 						arrRiepFasce.push('');
