@@ -7,18 +7,9 @@ typeid:19,
 uuid:"01613D4E-1899-42E7-B825-E1E055E06AE6"
 },
 {
-formIndex:58,
-location:"0,0",
-name:"lbl_opzioni",
-size:"80,20",
-transparent:true,
-typeid:7,
-uuid:"1E99980D-F13D-4A89-AC6B-AD2CBF8E2E44"
-},
-{
 extendsID:"1E62F84C-EB07-4BEB-926C-23B0AEB1D875",
 imageMediaID:"2F9D8260-829F-4FC9-B934-3EB9DDED8AC8",
-location:"461,360",
+location:"465,360",
 typeid:7,
 uuid:"8EDA019C-3AA7-4FD0-B7D1-DD808222BFF2"
 },
@@ -73,7 +64,7 @@ uuid:"C765396B-2623-4CFD-8C3D-D3B6D41569D4"
 },
 {
 extendsID:"F9B783A1-AA6D-4D4A-A5F9-BFD6662CB96C",
-location:"431,360",
+location:"435,360",
 typeid:7,
 uuid:"CDA224B5-3939-46A2-9172-1E4D621156F2"
 },
@@ -98,7 +89,7 @@ formIndex:1,
 location:"0,0",
 size:"211,20",
 styleClass:"title_text",
-text:"Ozioni stampa statistica ore",
+text:"Opzioni stampa statistica ore",
 transparent:true,
 typeid:7,
 uuid:"D71EF521-5E58-489D-803E-0F77CEBEF753"

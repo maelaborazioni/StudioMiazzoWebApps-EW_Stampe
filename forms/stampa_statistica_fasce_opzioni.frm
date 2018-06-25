@@ -27,7 +27,7 @@ uuid:"62CB3BA2-E576-44F8-A0FE-9F1A1E63FD78"
 },
 {
 extendsID:"8EF8FA14-9073-407F-A278-C4D516E29C86",
-height:90,
+height:115,
 typeid:19,
 uuid:"64ABF307-23DF-4F36-84A8-64EDE32EE93D"
 },
@@ -35,7 +35,7 @@ uuid:"64ABF307-23DF-4F36-84A8-64EDE32EE93D"
 dataProviderID:"vSuddividiPerDipendente",
 displayType:4,
 horizontalAlignment:0,
-location:"10,57",
+location:"10,65",
 name:"chk_dividi_dipendenti",
 onActionMethodID:"-1",
 onDataChangeMethodID:"-1",
@@ -74,7 +74,7 @@ uuid:"A27D0EEA-8562-4EAC-962D-FE729A598485",
 verticalAlignment:0
 },
 {
-location:"30,57",
+location:"30,65",
 name:"lbl_dividi_dipendenti",
 size:"150,20",
 text:"Suddividi per dipendente",

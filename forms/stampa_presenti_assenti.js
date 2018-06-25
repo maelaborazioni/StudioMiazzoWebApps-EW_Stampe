@@ -13,6 +13,13 @@ var _idditta = -1;
 var _arrDitteSel = [];
 
 /**
+ * @type {Number}
+ *
+ * @properties={typeid:35,uuid:"AD389E29-23F7-49A7-B262-20506F39CAE4",variableType:4}
+ */
+var vFormat = 0;
+
+/**
  * @properties={typeid:24,uuid:"EF2243E5-5E28-44E5-A722-BF300CBDE7DE"}
  */
 function stampaPresentiAssenti()
@@ -23,7 +30,7 @@ function stampaPresentiAssenti()
 	var params = forms.stampa_presenti_assenti_opzioni.getOptions();
 	    params['idgruppoinstallazione'] = -1;
 	    params['iddipendenti'] = [];
-	    //params['bexcel'] = 1;
+	    params['bexcel'] = vFormat;
 	    params['periodo'] = globals.toPeriodo(globals.TODAY.getFullYear(),globals.TODAY.getMonth()+1);
 	    params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
 		params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;

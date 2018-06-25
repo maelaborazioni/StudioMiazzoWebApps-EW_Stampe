@@ -120,7 +120,7 @@ function onShowForm(_firstShow, _event)
 	_super.onShowForm(_firstShow,_event);
 	
 	var frm = forms.stampa_statistica_eventi_opzioni;
-	var periodo = globals.getUltimoPeriodoAttivato(idditta);
+	var periodo = globals.getUltimoPeriodoAttivato(idditta) || globals.toPeriodo(globals.TODAY.getFullYear(),globals.TODAY.getMonth() + 1);
 	var MM = globals.getMeseDaPeriodo(periodo);
 	var yy = globals.getAnnoDaPeriodo(periodo);
 	frm.vDallaData = new Date(yy,MM-1,1);

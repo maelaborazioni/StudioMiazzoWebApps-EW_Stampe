@@ -63,8 +63,7 @@ function process_conferma_stampa_statistica_turni(event)
 			globals.exportReportRiepilogoTurniDip(params);
 		else
 			globals.exportReportRiepilogoTurni(params);
-	}
-	
+	}	
 }
 
 /**

@@ -22,8 +22,7 @@ styleClass:"check",
 toolTipText:"Raggruppamento",
 transparent:true,
 typeid:4,
-uuid:"077FB60F-649C-4EA3-9DD9-772A884F6ADB",
-visible:false
+uuid:"077FB60F-649C-4EA3-9DD9-772A884F6ADB"
 },
 {
 dataProviderID:"vRaggruppamento",
@@ -96,7 +95,7 @@ enabled:false,
 location:"50,230",
 name:"fld_gruppo_lavoratori",
 scrollbars:32,
-size:"205,20",
+size:"195,20",
 typeid:4,
 uuid:"1B49366C-E4B8-4703-936C-978CD16233C6"
 },
@@ -137,7 +136,7 @@ null,\
 null,\
 \"'AG_Lkp_ClassificazioniDettaglio'\",\
 null,\
-\"'filterRaggruppamento'\",\
+\"'filterRaggruppamentoDettaglio'\",\
 null,\
 null,\
 \"'codice'\",\
@@ -145,7 +144,7 @@ null,\
 null,\
 null,\
 \"true\",\
-\"'updateRaggruppamento'\",\
+\"'updateRaggruppamentoDettaglio'\",\
 null,\
 null,\
 null,\
@@ -180,8 +179,7 @@ styleClass:"check",
 toolTipText:"Raggruppamento",
 transparent:true,
 typeid:4,
-uuid:"45F6F81E-35A7-4A40-B6F8-57FAB0837A54",
-visible:false
+uuid:"45F6F81E-35A7-4A40-B6F8-57FAB0837A54"
 },
 {
 borderType:"EmptyBorder,0,0,0,0",
@@ -196,8 +194,7 @@ styleClass:"check",
 toolTipText:"Raggruppamento",
 transparent:true,
 typeid:4,
-uuid:"55D3B4F9-5757-46C2-A8C8-AEFD7C40AAC4",
-visible:false
+uuid:"55D3B4F9-5757-46C2-A8C8-AEFD7C40AAC4"
 },
 {
 borderType:"EmptyBorder,0,0,0,0",
@@ -212,8 +209,7 @@ styleClass:"check",
 toolTipText:"Raggruppamento",
 transparent:true,
 typeid:4,
-uuid:"5693B6D4-316B-4468-9165-C307F1A4F996",
-visible:false
+uuid:"5693B6D4-316B-4468-9165-C307F1A4F996"
 },
 {
 borderType:"EmptyBorder,0,0,0,0",
@@ -271,8 +267,8 @@ uuid:"5F6E09A3-63CE-4AFF-AE80-77D0F073443E"
 },
 {
 location:"10,140",
-name:"lbl_raggr",
-size:"94,20",
+name:"lbl_raggruppamento",
+size:"108,20",
 text:"Raggruppamento",
 transparent:true,
 typeid:7,
@@ -505,8 +501,7 @@ styleClass:"check",
 toolTipText:"Raggruppamento",
 transparent:true,
 typeid:4,
-uuid:"DB23756B-A24D-4C66-A628-6DDC15B775FD",
-visible:false
+uuid:"DB23756B-A24D-4C66-A628-6DDC15B775FD"
 },
 {
 customProperties:"methods:{\

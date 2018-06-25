@@ -267,7 +267,6 @@ function createExcelFile(dittaID, dateTo, operation)
 		var fileName = ['Elenco_Anagrafiche', 'Periodo', utils.dateFormat(vDateTo, globals.PERIODO_DATEFORMAT)].join('_');
 		var localFile = true;
 		/** @type {Array<byte>} */
-		
 		var template = plugins.file.readFile('C:/Report/EW_ElencoAnagrafiche.xls');
 		
 		// form opzioni anagrafica
