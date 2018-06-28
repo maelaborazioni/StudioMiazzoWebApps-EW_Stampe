@@ -74,10 +74,61 @@ function stampa_scheda_interna_ditta(idditta){
 /**
  * @param formName
  * @param formTitle
- *
+ * @param [enableGrouping]
+ * 
  * @properties={typeid:24,uuid:"632BB5C0-5B26-4BF1-B278-0E46D9A280A7"}
+ * @AllowToRunInFind
  */
-function seleziona_ditta_stampa(formName, formTitle)
+function seleziona_ditta_stampa(formName, formTitle, enableGrouping)
+{
+	/** @type {Array<Number>} */
+	var arrDitte = null;
+	
+	if(globals._filtroSuDitta)
+	   arrDitte = [globals._filtroSuDitta];
+	else
+	   arrDitte = globals.ma_utl_showLkpWindow({ lookup: 'LEAF_Lkp_Ditte',
+		                                        multiSelect : true,
+		                                        allowinBrowse: true, 
+												methodToAddFoundsetFilter : 'filtraDittaControllate',
+												/*width: 660, height: 670,*/
+												dateFormat: globals.EU_DATEFORMAT })
+												
+    if(arrDitte && arrDitte.length)
+	{
+		var form = forms[formName];
+		if(form.foundset.find())
+		{
+			form.foundset['idditta'] = arrDitte;
+			form.foundset.search();
+		}
+		
+		if(forms.stampa_filtri_anagrafici.foundset.find())
+		{
+		 	forms.stampa_filtri_anagrafici.foundset.idditta = arrDitte;
+		 	forms.stampa_filtri_anagrafici.foundset.search();
+		}
+		
+		azzeraFiltriAnagrafici();
+		
+		// TODO gestione enableGrouping
+		abilitaRaggruppamenti(forms.stampa_filtri_anagrafici.controller.getName(),enableGrouping || false);
+		
+		globals.ma_utl_setStatus(globals.Status.EDIT, formName);
+		globals.ma_utl_showFormInDialog(formName, formTitle);
+	}
+	else
+		globals.ma_utl_showWarningDialog('Selezionare almeno una ditta', 'Nessuna ditta selezionata');
+}
+
+/**
+ * @param formName
+ * @param formTitle
+ * @param [enableGrouping]
+ * 
+ * @properties={typeid:24,uuid:"975898D3-9CB0-4CEE-90ED-3BFA1C106238"}
+ */
+function seleziona_ditta_stampa_singola(formName, formTitle, enableGrouping)
 {
 	/** @type {Number} */
 	var idditta = null;
@@ -86,6 +137,7 @@ function seleziona_ditta_stampa(formName, formTitle)
 	   idditta = globals._filtroSuDitta;
 	else
 	   idditta = globals.ma_utl_showLkpWindow({ lookup: 'LEAF_Lkp_Ditte',
+		                                        multiSelect : true,
 		                                        allowinBrowse: true, 
 												methodToAddFoundsetFilter : 'filtraDittaControllate',
 												/*width: 660, height: 670,*/
@@ -96,48 +148,11 @@ function seleziona_ditta_stampa(formName, formTitle)
 		var form = forms[formName];
 		form.foundset.loadRecords(idditta);
 		forms.stampa_filtri_anagrafici.foundset.loadRecords(idditta);
+		
 		azzeraFiltriAnagrafici();
 		
-		globals.ma_utl_setStatus(globals.Status.EDIT, formName);
-		globals.ma_utl_showFormInDialog(formName, formTitle);
-	}
-	else
-		globals.ma_utl_showWarningDialog('Selezionare almeno una ditta', 'Nessuna ditta selezionata');
-}
-
-/**
- * 
- * @param formName
- * @param formTitle
- *
- * @properties={typeid:24,uuid:"A79F504A-5C36-4D28-84D4-5B99B101E539"}
- * @AllowToRunInFind
- */
-function seleziona_ditte_stampa(formName, formTitle)
-{
-	/** @type {Array<Number>} */
-	var arrDitte = [];
-	
-	if(globals._filtroSuDitta)
-	   arrDitte = [globals._filtroSuDitta];
-	else
-	   arrDitte = globals.ma_utl_showLkpWindow({ lookup: 'LEAF_Lkp_Ditte',
-		                                        multiSelect : true, 
-		                                        allowinBrowse: true, 
-												methodToAddFoundsetFilter : 'filtraDittaControllate',
-												/*width: 660, height: 670,*/
-												dateFormat: globals.EU_DATEFORMAT })
-
-	if(arrDitte.length)
-	{
-		/** @type {RuntimeForm} */
-		var form = forms[formName];
-		if(form.foundset.find())
-		{
-			form.foundset['idditta'] = arrDitte;
-			form.foundset.search();
-		}
-		azzeraFiltriAnagrafici();
+		// TODO gestione enableGrouping
+		abilitaRaggruppamenti(forms.stampa_filtri_anagrafici.controller.getName(),enableGrouping || false);
 		
 		globals.ma_utl_setStatus(globals.Status.EDIT, formName);
 		globals.ma_utl_showFormInDialog(formName, formTitle);
@@ -173,7 +188,7 @@ function selezione_ditta_stampa_annotazioni()
  */
 function selezione_ditta_stampa_situazione_eventi_lunghi()
 {
-	seleziona_ditta_stampa(forms.stampa_situazione_eventi_lunghi.controller.getName(), 'Stampa situazione eventi lunghi');
+	seleziona_ditta_stampa(forms.stampa_situazione_eventi_lunghi.controller.getName(), 'Stampa situazione eventi lunghi', true);
 }
 
 /**
@@ -186,7 +201,7 @@ function selezione_ditta_stampa_situazione_eventi_lunghi()
  */
 function selezione_ditta_stampa_situazione_ratei(idditta,idlavoratore)
 {
-	seleziona_ditta_stampa(forms.stampa_situazione_ratei.controller.getName(), 'Stampa situazione ratei');
+	seleziona_ditta_stampa(forms.stampa_situazione_ratei.controller.getName(), 'Stampa situazione ratei', true);
 }
 
 /**
@@ -198,7 +213,7 @@ function selezione_ditta_stampa_situazione_ratei(idditta,idlavoratore)
  */
 function selezione_ditta_stampa_statistica_eventi(event)
 {
-	seleziona_ditta_stampa(forms.stampa_statistica_eventi.controller.getName(), 'Stampa statistica eventi');
+	seleziona_ditta_stampa(forms.stampa_statistica_eventi.controller.getName(), 'Stampa statistica eventi', true);
 }
 
 /**
@@ -222,7 +237,7 @@ function selezione_ditta_stampa_statistica_fasce(event)
  */
 function selezione_ditta_stampa_situazione_turni(event)
 {
-	seleziona_ditta_stampa(forms.stampa_statistica_turni.controller.getName(), 'Stampa situazione turni');
+	seleziona_ditta_stampa(forms.stampa_statistica_turni.controller.getName(), 'Stampa situazione turni', true);
 }
 
 /**
@@ -245,7 +260,10 @@ function selezione_ditta_stampa_presenti_assenti(event)
 		var formTitle = 'Stampa presenti/assenti';
 		var form = forms[formName];
 		form.foundset.loadRecords(idDitta);
+		
 		azzeraFiltriAnagrafici();
+		
+		abilitaRaggruppamenti(forms.stampa_filtri_anagrafici.controller.getName(),false);
 		
 		globals.ma_utl_setStatus(globals.Status.EDIT, formName);
 		globals.ma_utl_showFormInDialog(formName, formTitle);
@@ -262,7 +280,7 @@ function selezione_ditta_stampa_presenti_assenti(event)
  */
 function selezione_ditta_stampa_situazione_straordinari(event)
 {
-	seleziona_ditta_stampa(forms.stampa_situazione_straordinari.controller.getName(), 'Stampa situazione straordinari');
+	seleziona_ditta_stampa(forms.stampa_situazione_straordinari.controller.getName(), 'Stampa situazione straordinari', true);
 }
 
 /**
@@ -274,7 +292,7 @@ function selezione_ditta_stampa_situazione_straordinari(event)
  */
 function selezione_ditta_stampa_statistica_ore(event)
 {
-	seleziona_ditta_stampa(forms.stampa_statistica_ore.controller.getName(), 'Stampa statistica ore');
+	seleziona_ditta_stampa(forms.stampa_statistica_ore.controller.getName(), 'Stampa statistica ore', true);
 }
 
 /**
@@ -286,7 +304,7 @@ function selezione_ditta_stampa_statistica_ore(event)
  */
 function selezione_ditta_stampa_esportazione_timbrature(event)
 {
-	seleziona_ditta_stampa(forms.stampa_esportazione_timbrature.controller.getName(),'Esportazione timbrature');
+	seleziona_ditta_stampa_singola(forms.stampa_esportazione_timbrature.controller.getName(),'Esportazione timbrature');
 }
 
 /**
@@ -356,9 +374,10 @@ function selezione_ditta_stampa_tipologia_controlli(event)
  */
 function selezione_periodo_stampa_anomalie_cartolina(event)
 {
-	var frm = forms.stampa_anomalie_cartolina;
-	globals.ma_utl_setStatus(globals.Status.EDIT,frm.controller.getName());
-	globals.ma_utl_showFormInDialog(frm.controller.getName(),'Stampa anomalie cartolina');
+	seleziona_ditta_stampa_singola(forms.stampa_anomalie_cartolina.controller.getName(),'Stampa anomalie cartolina');
+//	var frm = forms.stampa_anomalie_cartolina;
+//	globals.ma_utl_setStatus(globals.Status.EDIT,frm.controller.getName());
+//	globals.ma_utl_showFormInDialog(frm.controller.getName(),'Stampa anomalie cartolina');
 }
 
 /**
@@ -366,9 +385,10 @@ function selezione_periodo_stampa_anomalie_cartolina(event)
  */
 function selezione_periodo_stampa_cartolina_dipendente()
 {
-	var form = forms.stampa_cartolina_presenze_dipendente;
-	globals.ma_utl_setStatus(globals.Status.EDIT,form.controller.getName());
-    globals.ma_utl_showFormInDialog(form.controller.getName(),'Stampa cartolina dipendente');
+	seleziona_ditta_stampa_singola(forms.stampa_cartolina_presenze_dipendente.controller.getName(),'Stampa cartolina dipendente');
+//	var form = forms.stampa_cartolina_presenze_dipendente;
+//	globals.ma_utl_setStatus(globals.Status.EDIT,form.controller.getName());
+//    globals.ma_utl_showFormInDialog(form.controller.getName(),'Stampa cartolina dipendente');
 }
 
 /**
@@ -378,9 +398,10 @@ function selezione_periodo_stampa_cartolina_dipendente()
  */
 function selezione_data_stampa_situazione_ratei_dipendente(event)
 {
-	var frm = forms.stampa_situazione_ratei_dipendente;
-	globals.ma_utl_setStatus(globals.Status.EDIT,frm.controller.getName());
-	globals.ma_utl_showFormInDialog(frm.controller.getName(),'Stampa ratei dipendente');
+	seleziona_ditta_stampa_singola(forms.stampa_situazione_ratei_dipendente.controller.getName(),'Stampa ratei dipendente');
+//	var frm = forms.stampa_situazione_ratei_dipendente;
+//	globals.ma_utl_setStatus(globals.Status.EDIT,frm.controller.getName());
+//	globals.ma_utl_showFormInDialog(frm.controller.getName(),'Stampa ratei dipendente');
 }
 
 /**
@@ -494,21 +515,46 @@ function azzeraFiltriAnagrafici()
 }
 
 /**
+ * TODO generated, please specify type and doc for the params
+ * @param formName
+ * @param visible
+ *
+ * @properties={typeid:24,uuid:"E04B3483-472D-4F74-A364-5E5A8E4A7F72"}
+ */
+function abilitaRaggruppamenti(formName,visible)
+{
+	var frm = forms[formName];
+	
+	frm.elements['chk_group_contratto'].visible = visible;
+	frm.elements['chk_group_qualifica'].visible = visible;
+	frm.elements['chk_group_posizioneinps'].visible = visible;
+	frm.elements['chk_group_sedelavoro'].visible = visible;
+	frm.elements['chk_group_raggruppamento'].visible = visible;
+	
+}
+
+/**
  * Recupera i dati relativi alle fasce (forzata,programmata,teorica) dei lavoratori nel periodo richiesto
  * 
  * @param {Array<Number>} arrLavoratori
  * @param {Date} dal
  * @param {Date} al
- *
+ * @param {String} [contratto]
+ * @param {String} [qualifica]
+ * @param {String} [posinps]
+ * @param {String} [sedelavoro]
+ * @param {String} [raggruppamento]
+ * 
  * @return {JSDataSet}
  * 
  * @properties={typeid:24,uuid:"3171832E-D1B1-4A4B-9D49-77188780E2F2"}
  */
-function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al)
+function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,posinps,sedelavoro,raggruppamento)
 {
 	// definizione del dataset
 	var colNames = ['periodo','idlavoratore','codiceditta','ragionesociale','codicelavoratore','assunzione','cessazione',
-			 	    'nominativo'];
+			 	    'nominativo','codcontratto','desccontratto','codqualifica','descqualifica',
+					'codsedeinps','descsedeinps','codsedelavoro','descsedelavoro','codraggr','descraggr','coddettraggr','descdettraggr'];
 
 	for(var gm = 1; gm <= 31; gm++)
 		colNames.push('giorno_' + gm);
@@ -547,6 +593,83 @@ function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al)
 			arrRiepFasce.push(globals.getDataCessazione(arrLavoratori[l]));
 			// nominativo lavoratore
 			arrRiepFasce.push(globals.getNominativo(arrLavoratori[l]));
+			
+			// eventuali raggruppamenti
+			// contratto 
+			if(contratto)
+			{
+				var codContratto = globals.getContratto(arrLavoratori[l]);
+				var descContratto = globals.getDescContratto(codContratto);
+				arrRiepFasce.push(codContratto);
+				arrRiepFasce.push(descContratto);
+			}
+			else
+			{
+				arrRiepFasce.push(null);
+				arrRiepFasce.push(null);
+			}
+			// qualifica
+			if(qualifica)
+			{
+				var codQualifica = globals.getQualifica(arrLavoratori[l]);
+				var descQualifica = globals.getDescQualifica(codQualifica);
+				arrRiepFasce.push(codQualifica);
+				arrRiepFasce.push(descQualifica);
+			}
+			else
+			{
+				arrRiepFasce.push(null);
+				arrRiepFasce.push(null);
+			}
+			
+			// posizione inps
+			if(posinps)
+			{
+				var posInps = globals.getPosInpsLavoratore(arrLavoratori[l]);
+				var descInps = globals.getDescDittaInpsDefault(globals.getDitta(arrLavoratori[l]));
+				arrRiepFasce.push(posInps);
+				arrRiepFasce.push(descInps);
+			}
+			else
+			{
+				arrRiepFasce.push(null);
+				arrRiepFasce.push(null);
+			}
+			// sede di lavoro 
+			if(sedelavoro)
+			{
+				var idSede = globals.getIdSedeLavoro(arrLavoratori[l]);
+			    var codSede = globals.getCodSedeDiLavoro(idSede);
+			    var descSede = globals.getNomeSedeDiLavoro(idSede);
+			    arrRiepFasce.push(codSede);
+			    arrRiepFasce.push(descSede);
+			}
+			else
+			{
+				arrRiepFasce.push(null);
+				arrRiepFasce.push(null);
+			}
+			
+			// eventuale classificazione lavoratore
+			if(raggruppamento)
+			{  
+				//raggruppamento == iddittaclassificazione
+				var codClass = globals.getCodiceClassificazione(raggruppamento)
+				var descClass = globals.getDescClassificazione(raggruppamento);
+				var codDettClass = globals.getCodiceDettaglioClassificazioneLavoratore(arrLavoratori[l],codClass);
+	            var descDettClass = globals.getDescDettaglioClassificazione(raggruppamento,codDettClass); 
+			    arrRiepFasce.push(codClass);
+	            arrRiepFasce.push(descClass);
+	            arrRiepFasce.push(codDettClass);
+	            arrRiepFasce.push(descDettClass);
+			}
+			else
+			{
+				arrRiepFasce.push(null);
+				arrRiepFasce.push(null);
+				arrRiepFasce.push(null);
+				arrRiepFasce.push(null);
+			}
 			
 			var primoGgMese = globals.getFirstDatePeriodo(arrPeriodi[p]);
 			var ultimoGgMese = globals.getLastDatePeriodo(arrPeriodi[p]);
@@ -642,7 +765,12 @@ function exportReportRiepilogoTurniDip(params)
 		var parameters = {
 				              pelencodip : params['iddipendenti'],
 				              pdal : params['dalladata'],
-							  pal : params['alladata']
+							  pal : params['alladata'],
+							  pcontratto : params['groupcontratto'],
+							  pqualifica : params['groupqualifica'],
+							  pposinps   : params['groupposizioneinps'],
+							  psedelavoro : params['groupsedelavoro'],
+							  pclassificazione : params['groupclassificazione']
 						  };
 		
 		/**
@@ -701,21 +829,40 @@ function exportReportRiepilogoTurni(params)
 		globals.ma_utl_showFormInDialog(frm.controller.getName(), 'Avanzamento stato operazione');		
 		
 		// ottenimento del dataset
-		var ds = globals.ottieniDatasetRiepilogoFasce(params.iddipendenti,params.dalladata,params.alladata);
+		var ds = globals.ottieniDatasetRiepilogoFasce(params.iddipendenti,params.dalladata,params.alladata,
+			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,params.groupclassificazione);
 		
 		operation.op_message = 'Generazione del report in corso...';
 		operation.op_progress = 75;
 		
 		// definizione delle colonne e dei tipi del dataset
-		var types = [JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.TEXT,JSColumn.NUMBER,JSColumn.DATETIME,JSColumn.DATETIME,
-		            JSColumn.TEXT];
+		var types = [JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.TEXT,JSColumn.NUMBER,JSColumn.DATETIME,JSColumn.DATETIME,JSColumn.TEXT,
+		             JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT];
 		for(var gm = 1; gm <= 31; gm++)
 			types.push(JSColumn.TEXT);
 			
 		// creazione foundset corrispondente
 		var fs = databaseManager.getFoundSet(ds.createDataSource('dS_ReportRiepilogoFasce',types));
 		fs.loadAllRecords();
-		fs.sort('periodo,nominativo');
+		
+		var sortArr = [];
+		var sortStr = '';
+		if(params.groupcontratto)
+			sortArr.push('codcontratto');
+		if(params.groupqualifica)
+			sortArr.push('codqualifica');
+		if(params.groupposizioneinps)
+			sortArr.push('codsedeinps');
+		if(params.groupsedelavoro)
+			sortArr.push('codsedelavoro');
+		if(params.groupclassificazione)
+			sortArr.push('coddettraggr');
+		sortArr.push('periodo');
+		sortArr.push('nominativo');	
+		
+		sortStr = sortArr.join(',');
+		
+		fs.sort(sortStr);
 		
 		var reportParams = new Object();
 		reportParams.pdal = params.dalladata;

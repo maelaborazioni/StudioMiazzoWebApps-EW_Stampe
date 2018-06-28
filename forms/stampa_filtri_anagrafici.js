@@ -181,7 +181,7 @@ var vGroupRaggruppamento = false;
  *
  * @properties={typeid:35,uuid:"E1E4DE7D-B169-4B2C-8B93-C25AE467ADDA",variableType:4}
  */
-var vGroupTiporaggruppamento = 0;
+var vGroupTipoRaggruppamento = 0;
 
 /**
  * @type {Number}
@@ -247,7 +247,7 @@ function onDataChangeRaggruppamento(oldValue, newValue, event)
 		var realValues = new Array();
 		var displayValues = new Array();
 		
-		var ds = globals.getRaggruppamentiDitta(idditta);
+		var ds = globals.getClassificazioniDitta(idditta);
 		if(ds && ds.getMaxRowIndex())
 		{
 			for(var r = 1; r <= ds.getMaxRowIndex(); r++)
@@ -307,8 +307,7 @@ function updateStatus(name, status)
 	 */
 	var orderName = ['chk', 'group', name].join('_');
 	elements[orderName] && (elements[orderName].enabled = status);
-//	if(!status)
-		forms[controller.getName()]['vGroup' + name.substring(0,1).toUpperCase() + name.substr(1)] = status;
+	forms[controller.getName()]['vGroup' + name.substring(0,1).toUpperCase() + name.substr(1)] = elements[orderName].visible ? status : 0;
 }
 
 /**
@@ -336,7 +335,20 @@ function reset(name)
  */
 function filterContratto(fs)
 {
-	return filter(fs, 'SELECT idGruppoContrattuale FROM [dbo].[F_Ditta_Contratti_Al](?,?)', [idditta, vDateTo]);
+	return filter(fs, 'SELECT DISTINCT \
+	  DC.idDitta \
+	, DC.CodContratto \
+	, GC.idGruppoContrattuale \
+FROM \
+	Ditte_Contratti DC \
+	INNER JOIN \
+		E2TabGruppiContrattuali GC \
+		ON GC.RadiceContratto = DC.CodContratto \
+WHERE \
+	DC.NonApplicato = 0',
+	[]);
+	
+	//return filter(fs, 'SELECT idGruppoContrattuale FROM [dbo].[F_Ditta_Contratti_Al](?,?)', [idditta, vDateTo]);
 }
 
 /**
@@ -346,7 +358,14 @@ function filterContratto(fs)
  */
 function filterQualifica(fs)
 {
-	return filter(fs, 'SELECT idTabQualifiche FROM [dbo].[F_Ditta_Qualifiche_Al](?,?)', [idditta, vDateTo]);
+	return filter(fs, 'SELECT DISTINCT \
+	Q.idTabQualifiche \
+FROM \
+	Lavoratori L \
+	INNER JOIN E2TabQualifiche Q \
+		ON Q.RadiceQualifica = L.CodQualifica',
+		[]);
+	//return filter(fs, 'SELECT idTabQualifiche FROM [dbo].[F_Ditta_Qualifiche_Al](?,?)', [idditta, vDateTo]);
 }
 
 /**
@@ -356,7 +375,12 @@ function filterQualifica(fs)
  */
 function filterPosizioneInps(fs)
 {
-	return filter(fs, 'SELECT idDittaInps FROM [dbo].[F_Ditta_PosizioneInps_Al](?,?)', [idditta, vDateTo]);
+	return filter(fs, 'SELECT DISTINCT \
+	DI.idDittaInps \
+FROM \
+	Ditte_Inps DI',
+	[]);
+//	return filter(fs, 'SELECT idDittaInps FROM [dbo].[F_Ditta_PosizioneInps_Al](?,?)', [idditta, vDateTo]);
 }
 
 /**
@@ -366,7 +390,8 @@ function filterPosizioneInps(fs)
  */
 function filterSedeLavoro(fs)
 {
-	fs = filter(fs, 'SELECT idDittaSede FROM [dbo].[F_Ditta_Sedi_Al](?,?)', [idditta, vDateTo]);
+	fs = filter(fs, 'SELECT DISTINCT DS.idDittaSede FROM Ditte_Sedi DS',[]);
+//	fs = filter(fs, 'SELECT idDittaSede FROM [dbo].[F_Ditta_Sedi_Al](?,?)', [idditta, vDateTo]);
 	fs.addFoundSetFilterParam('codtiposede', globals.ComparisonOperator.EQ, globals.codSEDEOPERATIVA);
 	
 	return fs;
@@ -396,7 +421,8 @@ function filterRaggruppamento(fs)
 	    return null;
 	}
 	
-	return filter(fs, 'SELECT idDettaglio FROM [dbo].[F_Ditta_Raggruppamenti_Al](?,?,?)', [idditta, vDateTo, vRaggruppamentoTipoCampo]);
+	return filter(fs, 'SELECT DISTINCT idDettaglio FROM V_Ditte_Raggruppamenti_Dettaglio RD WHERE RD.CodTipoCampo = ?',[vRaggruppamentoTipoCampo]);
+//	return filter(fs, 'SELECT idDettaglio FROM [dbo].[F_Ditta_Raggruppamenti_Al](?,?,?)', [idditta, vDateTo, vRaggruppamentoTipoCampo]);
 }
 
 /**
@@ -599,9 +625,10 @@ function onDataChangeGruppoLavoratori(oldValue, newValue, event)
  * @properties={typeid:24,uuid:"09B3EE31-896D-442A-8E8E-F145079279F5"}
  */
 function onShowForm(firstShow, event)
-{
+{	
 	vDateTo = globals.TODAY;
 	resetAll();
+	gotoBrowse();
 }
 
 /**
@@ -633,7 +660,7 @@ function filterLavoratori(_fs,stampaDaGiornaliera)
 	var frmStampaFiltriAnag = forms.stampa_filtri_anagrafici;
 	if(fs.find())
 	{
-		fs.idditta = idditta;
+		fs.idditta = globals.foundsetToArray(foundset,'idditta');//idditta;
 		
 //		if(stampaDaGiornaliera)
 //		   fs.addFoundSetFilterParam('idlavoratore','IN',globals.foundsetToArray(forms.giorn_header.foundset,'idlavoratore'));
@@ -681,6 +708,7 @@ function filterLavoratori(_fs,stampaDaGiornaliera)
 function gotoBrowse()
 {
 	elements.fld_raggruppamento.enabled = false;
+	elements.btn_raggruppamento.enabled = false;
 }
 
 /**

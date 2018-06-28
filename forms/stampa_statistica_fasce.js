@@ -24,7 +24,13 @@ function stampaStatisticaFasce(event) {
 	params['idditta'] = idditta;
 	params['iddipendenti'] = iddipendenti;
 	params['bexcel'] = vFormat;
-
+//	params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
+//	params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
+//	params['groupposizioneinps'] = forms.stampa_filtri_anagrafici.vGroupPosizioneinps;
+//	params['groupsedelavoro'] = forms.stampa_filtri_anagrafici.vGroupSedelavoro;
+//	params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
+//	params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
+	
 	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaStatisticaFasce";
 	globals.addJsonWebServiceJob(url, params);
 	
@@ -88,7 +94,8 @@ function FiltraDipStatistica(_fs)
 	
 	_fs.addFoundSetFilterParam('assunzione','^||<=',_frmOpt.vAllaData);
 	_fs.addFoundSetFilterParam('cessazione','^||>=',_frmOpt.vDallaData);
-	_fs.addFoundSetFilterParam('idditta','IN',idditta);
+	_fs.addFoundSetFilterParam('idditta','IN', globals.foundsetToArray(foundset,'idditta'));
+//	_fs.addFoundSetFilterParam('idditta','IN',idditta);
 	
 	return _fs;
 }

@@ -120,7 +120,7 @@ function selectLavoratori()
 	var iddipendenti = globals.ma_utl_showLkpWindow
 						(
 							{
-								  lookup: foundset.tipologia === globals.Tipologia.ESTERNA ? 'AG_Lkp_LavoratoriEsterni' : 'AG_Lkp_Lavoratori'  
+								  lookup: 'AG_Lkp_Lavoratori'// TODO foundset.tipologia === globals.Tipologia.ESTERNA ? 'AG_Lkp_LavoratoriEsterni' : 'AG_Lkp_Lavoratori'  
 								, returnForm: controller.getName()
 								, methodToAddFoundsetFilter: 'filterLavoratori'
 								, multiSelect: true

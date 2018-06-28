@@ -90,7 +90,8 @@ function annullaStampaStatEventi(event) {
  */
 function FiltraDipStatistica(_fs)
 {
-	_fs.addFoundSetFilterParam('idditta','=',_idditta);
+	_fs.addFoundSetFilterParam('idditta','IN', globals.foundsetToArray(foundset,'idditta'));
+	//_fs.addFoundSetFilterParam('idditta','=',_idditta);
 	_fs.addFoundSetFilterParam('assunzione','^||<=',_al);
 	_fs.addFoundSetFilterParam('cessazione','^||>=',_dal);
 	_fs.sort('nominativo asc');
