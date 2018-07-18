@@ -42,7 +42,7 @@ function stampa_scheda_interna_ditta(idditta){
 		//recupera la stampa a partire dall'id dell'operazione
 		var _op_id = _response['op_id']
 		
-		/** @type {JSFoundset<db:/ma_log/operationfile>} */
+		/** @type {JSFoundSet<db:/ma_log/operationfile>} */
 		var _fs_op = databaseManager.getFoundSet('ma_log','OperationFile')
 		if(_fs_op.find())
 		{
@@ -51,7 +51,7 @@ function stampa_scheda_interna_ditta(idditta){
 		}
 		if(_fs_op.getSize() == 1)
 		{
-			/** @type {JSFoundset<db:/ma_log/filelog>} */
+			/** @type {JSFoundSet<db:/ma_log/filelog>} */
 			var _fs_file = databaseManager.getFoundSet('ma_log','FileLog')
 			if(_fs_file.find())
 			{
@@ -247,7 +247,7 @@ function selezione_ditta_stampa_situazione_turni(event)
  */
 function selezione_ditta_stampa_presenti_assenti(event)
 {
-	/** @type {JSFoundset<db:/ma_presenze/e2sediinstallazione>} */
+	/** @type {JSFoundSet<db:/ma_presenze/e2sediinstallazione>} */
 	var fsGruppiInst = databaseManager.getFoundSet(globals.Server.MA_PRESENZE,globals.Table.SEDI_INSTALLAZIONE);
 	fsGruppiInst.loadAllRecords();
 	if(fsGruppiInst.getSize() > 1)

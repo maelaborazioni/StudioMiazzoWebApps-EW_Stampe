@@ -24,7 +24,7 @@ function AggiornaCausali(rec)
 	var _numCausali = vElencoCausali.length;
 	for (var i=0;i<_numCausali;i++)
 	{
-		/** @type {JSFoundset<db:/ma_presenze/e2timbratureserviziogestione>} */
+		/** @type {JSFoundSet<db:/ma_presenze/e2timbratureserviziogestione>} */
 		var fs = databaseManager.getFoundSet(globals.Server.MA_PRESENZE, 'e2timbratureserviziogestione');
 		if(fs.find())
 		{

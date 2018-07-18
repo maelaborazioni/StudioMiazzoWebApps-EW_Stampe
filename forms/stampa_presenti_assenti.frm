@@ -5,7 +5,7 @@ anchors:11,
 borderType:"SpecialMatteBorder,1.0,0.0,1.0,0.0,#434343,#000000,#434343,#000000,0.0,",
 horizontalAlignment:4,
 location:"0,320",
-size:"501,20",
+size:"500,20",
 styleClass:"title_bar",
 typeid:7,
 uuid:"211561AB-76D4-4507-8310-E237BFFD9166"

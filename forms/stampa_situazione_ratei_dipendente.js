@@ -29,7 +29,7 @@ function stampaSituazioneRateiDipendente(event)
 	globals.ma_utl_setStatus(globals.Status.BROWSE,controller.getName());
     globals.svy_mod_closeForm(event);
     
-    /** @type {JSFoundset<db:/ma_anagrafiche/ditte_ratei>} */
+    /** @type {JSFoundSet<db:/ma_anagrafiche/ditte_ratei>} */
 	var fs = databaseManager.getFoundSet(globals.Server.MA_ANAGRAFICHE, globals.Table.DITTE_RATEI);
 	if(fs.find())
 	{

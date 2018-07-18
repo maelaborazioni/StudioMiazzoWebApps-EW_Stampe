@@ -113,7 +113,7 @@ function AggiornaSelezioneRatei(rec)
 	vArrayCodiciRateo = [];
 	for (var i=0;i<_numFtr;i++)
 	{
-		/** @type {JSFoundset<db:/ma_anagrafiche/ditte_ratei>} */
+		/** @type {JSFoundSet<db:/ma_anagrafiche/ditte_ratei>} */
 		var fs = databaseManager.getFoundSet(globals.Server.MA_ANAGRAFICHE, 'ditte_ratei');
 		if(fs.find())
 		{

@@ -100,7 +100,7 @@ function FiltraDipStatistica(_fs)
 }
 
 /**
- * @param {JSFoundset<db:/ma_anagrafiche/lavoratori>} fs
+ * @param {JSFoundSet<db:/ma_anagrafiche/lavoratori>} fs
  *
  * @properties={typeid:24,uuid:"DADC723B-D7C6-4374-9686-B9AF7BDCC2D7"}
  */
