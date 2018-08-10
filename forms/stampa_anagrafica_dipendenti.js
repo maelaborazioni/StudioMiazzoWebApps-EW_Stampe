@@ -361,7 +361,7 @@ function createExcelFile(dittaID, dateTo, operation)
         
         if(frmAnag.vFilterRaggruppamento)
         {
-        	strSQL = strSQL + " , LR.CodClassificazione, LR.DescrizioneClassificazione";
+        	strSQL = strSQL + " , LR.CodClassificazione, DCD.Descrizione";
         	colNames.push('codclassificazione');
         	colTypes.push(JSColumn.TEXT);
         	colNames.push('descrizioneclassificazione');
@@ -397,8 +397,10 @@ function createExcelFile(dittaID, dateTo, operation)
         }
         
         if(frmAnag.vFilterRaggruppamento)
-           	strSQL = strSQL + " LEFT OUTER JOIN V_Lav_Raggruppamenti LR ON LR.idLavoratore = L.idLavoratore"
-        
+        {
+        	strSQL = strSQL + " LEFT OUTER JOIN Lavoratori_Classificazioni LR ON LR.idLavoratore = L.idLavoratore";
+           	strSQL = strSQL + " LEFT OUTER JOIN Ditte_ClassificazioniDettaglio DCD ON LR.CodClassificazione = DCD.Codice";
+        }
         strSQL = strSQL + " LEFT OUTER JOIN Ditte_Sedi DS ON L.idDittaSede = DS.idDittaSede"
 		strSQL = strSQL + " WHERE D.idDitta = ?"
 		
