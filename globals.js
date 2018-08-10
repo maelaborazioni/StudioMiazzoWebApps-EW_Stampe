@@ -317,7 +317,7 @@ function selezione_ditta_stampa_esportazione_timbrature(event)
  */
 function stampaGiornalieraDitta(params, callback)
 {
-	var url = WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaGiornaliera";
+	var url = WS_REPORT_GIORNALIERA_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaGiornaliera";
 	addJsonWebServiceJob(url, params, null, null, callback);
 }
 
@@ -890,7 +890,7 @@ function exportReportRiepilogoTurni(params)
  */
 function stampaGiornalieraDittaSync(params)
 {
-	var url = WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaGiornalieraSync";
+	var url = WS_REPORT_GIORNALIERA_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaGiornalieraSync";
 	return getWebServiceResponse(url, params);
 }
 
