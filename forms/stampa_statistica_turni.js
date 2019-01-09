@@ -14,7 +14,9 @@ function stampaStatisticaTurni(event) {
 	
 	var _frmOpt = forms.stampa_statistica_turni_opzioni;
 	
-	var iddipendenti = selectLavoratori();
+	var iddipendenti = globals.getLavoratoriDittaDalAl(globals.foundsetToArray(foundset,'idditta'),
+											           forms.stampa_statistica_turni_opzioni.vDallaData,
+													   forms.stampa_statistica_turni_opzioni.vAllaData);;
 	if (!iddipendenti || iddipendenti.length === 0)
 		return false;
 
@@ -60,17 +62,127 @@ function confermaStampa(event)
  */
 function process_conferma_stampa_statistica_turni(event)
 {
-	plugins.busy.unblock();
-	
-	if(stampaStatisticaTurni(event));
+	try
+	{	
+		if(stampaStatisticaTurni(event))
+		{
+			if(params.bexcel)
+				exportExcel(event);
+			else if(params.suddivisioneperdipendente)
+				exportReport(event,globals.exportReportRiepilogoTurniDip);
+			else
+				exportReport(event,globals.exportReportRiepilogoTurni);
+			
+		}
+		else throw new Error('Verificare i parametri della selezione');
+		
+//		if(proceed)
+//		{	
+//			globals.ma_utl_setStatus(globals.Status.BROWSE,controller.getName());
+//			globals.svy_mod_closeForm(event);
+//			
+//			if(params.bexcel)
+//				globals.exportExcelRiepilogoTurni(params);
+//			else
+//			{
+//				if(params.suddivisioneperdipendente)
+//					globals.exportReportRiepilogoTurniDip(params);
+//				else
+//					globals.exportReportRiepilogoTurni(params);
+//			}			
+//		}
+	}
+	catch(ex)
 	{
+		var msg = 'Metodo process_conferma_stampa_statistica_turni : ' + ex.message;
+		globals.ma_utl_showErrorDialog(msg)
+		globals.ma_utl_logError(msg,LOGGINGLEVEL.ERROR);
+	}
+	finally
+	{
+		plugins.busy.unblock();
+	}
+}
+
+/**
+ * TODO generated, please specify type and doc for the params
+ * @param {JSEvent} event
+ * @param {Function} method
+ * 
+ * @properties={typeid:24,uuid:"99ACAC29-4BBB-49AB-BDBF-5866869AD612"}
+ */
+function exportReport(event,method)
+{
+	try
+	{
+		globals.ma_utl_setStatus(globals.Status.BROWSE,forms.stampa_filtri_anagrafici.controller.getName());
 		globals.svy_mod_closeForm(event);
-	
-		if(params.suddivisioneperdipendente)
-			globals.exportReportRiepilogoTurniDip(params);
-		else
-			globals.exportReportRiepilogoTurni(params);
-	}	
+			
+		var vDate = new Date();
+		var values = 
+		{
+			op_hash		: utils.stringMD5HashBase64(idditta + vDate.toString()),
+			op_ditta	: idditta,
+			op_message	: 'Esportazione in corso...',
+			op_periodo 	: utils.dateFormat(vDate, globals.PERIODO_DATEFORMAT)
+		};
+		
+		globals.startAsyncOperation
+		(
+			 method,//globals.exportReportRiepilogoTurni,
+			 [params],
+			 null,
+			 null,
+			 globals.OpType.SST,
+			 values
+		);
+		
+		
+	}
+	catch(ex)
+	{
+		application.output(ex,LOGGINGLEVEL.ERROR);
+	}
+}
+
+/**
+ * TODO generated, please specify type and doc for the params
+ * @param event
+ *
+ * @properties={typeid:24,uuid:"2F3B2A47-2408-4062-A283-A356ACF64D88"}
+ */
+function exportExcel(event)
+{
+	try
+	{
+		globals.ma_utl_setStatus(globals.Status.BROWSE,forms.stampa_filtri_anagrafici.controller.getName());
+		globals.svy_mod_closeForm(event);
+			
+		var vDate = new Date();
+		var values = 
+		{
+			op_hash		: utils.stringMD5HashBase64(idditta + vDate.toString()),
+			op_ditta	: idditta,
+			op_message	: 'Esportazione in corso...',
+			op_periodo 	: utils.dateFormat(vDate, globals.PERIODO_DATEFORMAT)
+		};
+		
+		globals.startAsyncOperation
+		(
+			 globals.exportExcelRiepilogoTurni,
+			 [params],
+			 null,
+			 null,
+			 globals.OpType.EST,
+			 values
+		);
+		
+		
+	}
+	catch(ex)
+	{
+		application.output(ex,LOGGINGLEVEL.ERROR);
+	}
 }
 
 /**
@@ -117,5 +229,30 @@ function onShowForm(_firstShow, _event)
  */
 function checkExport()
 {
+	return true;
+}
+
+/**
+ * Handle changed data, return false if the value should not be accepted. In NGClient you can return also a (i18n) string, instead of false, which will be shown as a tooltip.
+ *
+ * @param {String} oldValue old value
+ * @param {String} newValue new value
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @return {Boolean}
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"6648FE2E-F51B-4A6C-A367-B0F0B3810676"}
+ */
+function onDataChangeFileFormat(oldValue, newValue, event) 
+{
+	var enabled = !newValue;
+		
+	forms.stampa_statistica_turni_opzioni.elements.chk_dividi_dipendenti.enabled = enabled;
+
+	if(!enabled)
+		forms.stampa_statistica_turni_opzioni.vSuddividiPerDipendente = enabled;
+	
 	return true;
 }

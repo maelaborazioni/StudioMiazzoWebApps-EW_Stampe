@@ -54,8 +54,15 @@ typeid:7,
 uuid:"96F5CE77-D15B-42B5-B40D-816EC39751EB"
 },
 {
+customProperties:"methods:{\
+onDataChangeMethodID:{\
+arguments:null,\
+parameters:null\
+}\
+}",
 extendsID:"2FC1F624-E24C-4334-BE33-01E287B808A5",
 location:"5,348",
+onDataChangeMethodID:"6648FE2E-F51B-4A6C-A367-B0F0B3810676",
 typeid:4,
 uuid:"CC70AF53-A35B-48EA-9B0C-87AD49B07F1C"
 },

@@ -197,7 +197,7 @@ function exportReport(event)
 }
 
 /**
- * Lancia l'operazione lung adi esportazione del file di excel
+ * Lancia l'operazione lunga di esportazione del file di excel
  * 
  * @param {JSEvent} event
  *
