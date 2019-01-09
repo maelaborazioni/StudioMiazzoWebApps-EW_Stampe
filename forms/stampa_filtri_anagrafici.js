@@ -546,7 +546,7 @@ function updateSedeLavoro(records)
 		);
 		
 		vSediLavoroString = temp.join('\n');
-		vSediLavoro = records.map(function(record){ return record.codice; });
+		vSediLavoro = records.map(function(record){ return record.iddittasede; });
 	}
 }
 
@@ -675,6 +675,11 @@ function filterLavoratori(_fs,stampaDaGiornaliera)
 			fs.codqualifica = vQualifica;
 		if(frmStampaFiltriAnag.vFilterPosizioneInps)
 			fs.posizioneinps = vPosizioniInps;
+		
+		// filtro sedi di lavoro
+		if(frmStampaFiltriAnag.vFilterSedeLavoro)
+			fs.iddittasede = vSediLavoro;
+		
 		if(frmStampaFiltriAnag.vFilterGroupLavoratori)
 		{
 			if(vDateTo == null)
@@ -700,6 +705,61 @@ function filterLavoratori(_fs,stampaDaGiornaliera)
 	}
 	
 	return _fs;
+}
+
+/**
+ * @param {Date} from
+ * @param {Date} to
+ * 
+ * @AllowToRunInFind
+ *
+ * @properties={typeid:24,uuid:"9AA23A38-632E-48FA-B66C-855D675FA735"}
+ */
+function getLavoratori(from,to)
+{
+	/** @type {JSFoundSet<db:/ma_anagrafiche/lavoratori>}*/
+	var fs = databaseManager.getFoundSet(globals.Server.MA_ANAGRAFICHE,globals.Table.LAVORATORI);
+	var frmStampaFiltriAnag = forms.stampa_filtri_anagrafici;
+	if(fs.find())
+	{
+		fs.idditta = globals.foundsetToArray(foundset,'idditta');//idditta;
+		
+		//fs.assunzione = 
+		
+		if(frmStampaFiltriAnag.vFilterRaggruppamento)
+			fs.lavoratori_to_lavoratori_classificazioni.codtipoclassificazione = vRaggruppamentoCodice;
+		if(frmStampaFiltriAnag.vRaggruppamentiDettaglio)
+			fs.lavoratori_to_lavoratori_classificazioni.codclassificazione = vRaggruppamentiDettaglio;
+		if(frmStampaFiltriAnag.vFilterContratto)
+			fs.codcontratto = vContratto;
+		if(frmStampaFiltriAnag.vFilterQualifica)
+			fs.codqualifica = vQualifica;
+		if(frmStampaFiltriAnag.vFilterPosizioneInps)
+			fs.posizioneinps = vPosizioniInps;
+		if(frmStampaFiltriAnag.vFilterGroupLavoratori)
+		{
+			if(vDateTo == null)
+				vDateTo = globals.TODAY;
+			
+			var params = globals.inizializzaParametriAttivaMese
+			(
+				idditta, 
+	            vDateTo.getFullYear() * 100 + vDateTo.getMonth() + 1,
+				globals.getGruppoInstallazioneDitta(idditta), 
+				vGroupLavoratori,
+				globals._tipoConnessione
+			);
+			
+	        var arrLavGruppo = globals.getLavoratoriGruppo(params,params.idditta);
+	        fs.addFoundSetFilterParam('idlavoratore',globals.ComparisonOperator.IN,arrLavGruppo);
+	        
+		}
+		
+		fs.search(); 
+				
+	}
+	
+	return fs;
 }
 
 /**
