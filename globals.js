@@ -79,7 +79,7 @@ function stampa_scheda_interna_ditta(idditta){
  * @properties={typeid:24,uuid:"632BB5C0-5B26-4BF1-B278-0E46D9A280A7"}
  * @AllowToRunInFind
  */
-function seleziona_ditta_stampa(formName, formTitle, enableGrouping)
+function seleziona_ditte_stampa(formName, formTitle, enableGrouping)
 {
 	/** @type {Array<Number>} */
 	var arrDitte = null;
@@ -128,7 +128,7 @@ function seleziona_ditta_stampa(formName, formTitle, enableGrouping)
  * 
  * @properties={typeid:24,uuid:"975898D3-9CB0-4CEE-90ED-3BFA1C106238"}
  */
-function seleziona_ditta_stampa_singola(formName, formTitle, enableGrouping)
+function seleziona_ditta_stampa(formName, formTitle, enableGrouping)
 {
 	/** @type {Number} */
 	var idditta = null;
@@ -137,7 +137,7 @@ function seleziona_ditta_stampa_singola(formName, formTitle, enableGrouping)
 	   idditta = globals._filtroSuDitta;
 	else
 	   idditta = globals.ma_utl_showLkpWindow({ lookup: 'LEAF_Lkp_Ditte',
-		                                        multiSelect : true,
+		                                        multiSelect : false,
 		                                        allowinBrowse: true, 
 												methodToAddFoundsetFilter : 'filtraDittaControllate',
 												/*width: 660, height: 670,*/
@@ -304,7 +304,7 @@ function selezione_ditta_stampa_statistica_ore(event)
  */
 function selezione_ditta_stampa_esportazione_timbrature(event)
 {
-	seleziona_ditta_stampa_singola(forms.stampa_esportazione_timbrature.controller.getName(),'Esportazione timbrature');
+	seleziona_ditta_stampa(forms.stampa_esportazione_timbrature.controller.getName(),'Esportazione timbrature');
 }
 
 /**
@@ -374,7 +374,7 @@ function selezione_ditta_stampa_tipologia_controlli(event)
  */
 function selezione_periodo_stampa_anomalie_cartolina(event)
 {
-	seleziona_ditta_stampa_singola(forms.stampa_anomalie_cartolina.controller.getName(),'Stampa anomalie cartolina');
+	seleziona_ditta_stampa(forms.stampa_anomalie_cartolina.controller.getName(),'Stampa anomalie cartolina');
 //	var frm = forms.stampa_anomalie_cartolina;
 //	globals.ma_utl_setStatus(globals.Status.EDIT,frm.controller.getName());
 //	globals.ma_utl_showFormInDialog(frm.controller.getName(),'Stampa anomalie cartolina');
@@ -385,7 +385,7 @@ function selezione_periodo_stampa_anomalie_cartolina(event)
  */
 function selezione_periodo_stampa_cartolina_dipendente()
 {
-	seleziona_ditta_stampa_singola(forms.stampa_cartolina_presenze_dipendente.controller.getName(),'Stampa cartolina dipendente');
+	seleziona_ditta_stampa(forms.stampa_cartolina_presenze_dipendente.controller.getName(),'Stampa cartolina dipendente');
 //	var form = forms.stampa_cartolina_presenze_dipendente;
 //	globals.ma_utl_setStatus(globals.Status.EDIT,form.controller.getName());
 //    globals.ma_utl_showFormInDialog(form.controller.getName(),'Stampa cartolina dipendente');
@@ -398,7 +398,7 @@ function selezione_periodo_stampa_cartolina_dipendente()
  */
 function selezione_data_stampa_situazione_ratei_dipendente(event)
 {
-	seleziona_ditta_stampa_singola(forms.stampa_situazione_ratei_dipendente.controller.getName(),'Stampa ratei dipendente');
+	seleziona_ditta_stampa(forms.stampa_situazione_ratei_dipendente.controller.getName(),'Stampa ratei dipendente');
 //	var frm = forms.stampa_situazione_ratei_dipendente;
 //	globals.ma_utl_setStatus(globals.Status.EDIT,frm.controller.getName());
 //	globals.ma_utl_showFormInDialog(frm.controller.getName(),'Stampa ratei dipendente');
@@ -688,9 +688,10 @@ function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,p
 			}
 			
 			ds.addRow(arrRiepFasce);
+			
 		}
 	}
-	
+		
 	return ds;
 	
 //	var sqlRiepilogoFasce = "SELECT \
@@ -807,9 +808,10 @@ function exportReportRiepilogoTurniDip(params)
 }
 
 /**
- * TODO generated, please specify type and doc for the params
+ * Creazione del report con il riepilogo dei turni
+ * 
  * @param params
- *
+ * 
  * @properties={typeid:24,uuid:"2C16F721-BAA2-4F40-9CD6-2C13F3666D4C"}
  */
 function exportReportRiepilogoTurni(params)
@@ -838,6 +840,7 @@ function exportReportRiepilogoTurni(params)
 		// definizione delle colonne e dei tipi del dataset
 		var types = [JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.TEXT,JSColumn.NUMBER,JSColumn.DATETIME,JSColumn.DATETIME,JSColumn.TEXT,
 		             JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT];
+		// ciclo su 31 giorni (esposizione del report suddivisa per periodo)
 		for(var gm = 1; gm <= 31; gm++)
 			types.push(JSColumn.TEXT);
 			
@@ -864,13 +867,16 @@ function exportReportRiepilogoTurni(params)
 		
 		fs.sort(sortStr);
 		
+		var fileName = 'Riepilogo_Programmazione_Fasce_Dal_' + globals.dateFormat(params.dal,globals.ISO_DATEFORMAT) + '_Al_' + globals.dateFormat(params.al,globals.ISO_DATEFORMAT);
+		
 		var reportParams = new Object();
 		reportParams.pdal = params.dalladata;
 		reportParams.pal = params.alladata;
 		
 		var reportName = 'PT_RiepilogoProgrammazione.jasper';
-		var fileName = 'Riepilogo_Programmazione_Fasce_Dal_' + globals.dateFormat(params.dal,globals.ISO_DATEFORMAT) + '_Al_' + globals.dateFormat(params.al,globals.ISO_DATEFORMAT) +'.pdf';
+		fileName += '.pdf';
 		globals.createReportWithFoundset(fs,reportParams,reportName,fileName,operation);
+				
 	}
 	catch(ex)
 	{
@@ -880,6 +886,116 @@ function exportReportRiepilogoTurni(params)
 	finally
 	{
 		plugins.busy.unblock();
+	}
+}
+
+/**
+ * Creazione del file excel con il riepilogo dei turni
+ * 
+ * @param params
+ * 
+ * @properties={typeid:24,uuid:"6CF25DBC-E652-4594-B291-11A762953676"}
+ */
+function exportExcelRiepilogoTurni(params)
+{
+	try
+	{
+		var op_values = {op_ditta : params.idditta,
+						 op_progress : 25,
+						 op_periodo : params.dalladata.getFullYear() * 100 + params.dalladata.getMonth() + 1,
+						 op_message : 'Recupero dei dati in corso...' };
+		var operation = scopes.log.GetNewOperation(globals.OpType.SST,op_values);
+		if(!operation)
+			throw new Error('createReport: Cannot create operation');		
+		
+		var fileName = 'Riepilogo_Programmazione_Fasce_Dal_' + globals.dateFormat(params.dal,globals.ISO_DATEFORMAT) + '_Al_' + globals.dateFormat(params.al,globals.ISO_DATEFORMAT);
+		
+		/** @type {Array<byte>} */
+		var template = plugins.file.readFile('C:/Report/PT_RiepilogoProgrammazione.xls');
+		
+		var frm = forms.mao_history_main_lite;
+
+		//  apertura form storico senza necessariamente aprire il program relativo (molto più snello)	
+		globals.ma_utl_showFormInDialog(frm.controller.getName(), 'Avanzamento stato operazione');		
+		
+		// ottenimento del dataset
+		var ds = globals.ottieniDatasetRiepilogoFasce(params.iddipendenti,params.dalladata,params.alladata,
+			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,params.groupclassificazione);
+		// TODO ordinamento ???
+		
+		// definizione delle colonne e dei tipi del dataset
+		var colTypes = [JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.TEXT,JSColumn.NUMBER,JSColumn.DATETIME,JSColumn.DATETIME,JSColumn.TEXT,
+		             JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT];
+		var colNames = ['periodo','idlavoratore','codiceditta','ragionesociale','codicelavoratore','assunzione','cessazione',
+				 	    'nominativo','codcontratto','desccontratto','codqualifica','descqualifica',
+						'codsedeinps','descsedeinps','codsedelavoro','descsedelavoro','codraggr','descraggr','coddettraggr','descdettraggr'];
+		
+		// ciclo su 31 giorni (esposizione del report suddivisa per periodo)
+		for(var gm = 1; gm <= 31; gm++)
+			colTypes.push(JSColumn.TEXT);
+				
+//		var sortArr = [];
+//		var sortStr = '';
+//		if(params.groupcontratto)
+//			sortArr.push('codcontratto');
+//		if(params.groupqualifica)
+//			sortArr.push('codqualifica');
+//		if(params.groupposizioneinps)
+//			sortArr.push('codsedeinps');
+//		if(params.groupsedelavoro)
+//			sortArr.push('codsedelavoro');
+//		if(params.groupclassificazione)
+//			sortArr.push('coddettraggr');
+//		sortArr.push('periodo');
+//		sortArr.push('nominativo');	
+//		
+//		sortStr = sortArr.join(',');
+//		
+//		fs.sort(sortStr);
+								
+		var bytes = globals.xls_export(ds,fileName,true,false,true,null,'Riepilogo programmazione turni',template,colNames,colTypes);
+	
+		ds.removeRow(-1);
+		
+		if(!bytes || bytes.length == 0)
+			return false;
+		
+		databaseManager.startTransaction();
+		
+		if(!globals.saveFile(operation, bytes, fileName + '.csv', globals.MimeTypes.CSV))
+			throw 'Errore durante il salvataggio del file';
+		
+		operation.op_message = 'Esportazione completata con successo';
+		operation.op_end = new Date();
+		operation.op_status = globals.OpStatus.SUCCESS;
+		operation.op_progress = 100;
+		
+		return true;
+	}
+	catch(ex)
+	{
+		application.output(ex.message,LOGGINGLEVEL.ERROR);
+		if(operation)
+		{
+			operation.op_end = new Date();
+			operation.op_status = globals.OpStatus.ERROR;
+			operation.op_progress = 0;
+			operation.op_message = 'Errore durante l\'esportazione dei dati' + (ex && (': ' + ex));
+		}
+		
+		return false;
+	}
+	finally
+	{
+		/**
+		 * Remove all created files and commit the transaction
+		 */
+		plugins.file.deleteFolder(globals.SERVER_TMPDIR.replace(/\\/g,'/') + '/export/', false);
+		databaseManager.commitTransaction();
+		
+		var retObj = {status : operation};
+		forms.mao_history.checkStatusCallback(retObj);
+		forms.mao_history.operationDone(retObj);
 	}
 }
 
