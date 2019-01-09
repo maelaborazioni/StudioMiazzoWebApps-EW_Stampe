@@ -110,6 +110,14 @@ function filterLavoratori(fs)
 }
 
 /**
+ * @properties={typeid:24,uuid:"AD021B6A-4426-46FE-AB0C-76412B5506D9"}
+ */
+function getLavoratori()
+{
+	return forms.stampa_filtri_anagrafici.getLavoratori();
+}
+
+/**
  * @return {Array}
  * 
  * @properties={typeid:24,uuid:"1672A006-0CB8-4DAB-8945-9D3734644EE3"}
