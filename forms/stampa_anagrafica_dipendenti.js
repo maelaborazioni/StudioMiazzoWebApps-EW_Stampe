@@ -342,21 +342,35 @@ function createExcelFile(dittaID, dateTo, operation)
         strSQL = strSQL + " , L.CodCategoriaParticolare as CodCategPartic, TCP.Descrizione AS DescCategPartic"
         strSQL = strSQL + " , ISNULL(SE.Descrizione, 'NON DEFINITO') AS Cittadinanza"
         strSQL = strSQL + " , CASE WHEN dbo.F_Lav_Extracomunitario(L.idLavoratore, '') = 1 THEN 'SI' ELSE 'NO' END AS Extracomunitario"
-//		strSQL = strSQL + " , ";
+
         if(frmOpt.vChkDecorrenzeAl)
         {
            template = plugins.file.readFile('C:/Report/EW_ElencoAnagraficheDecorrenze.xls');	
-           
-           strSQL = strSQL + " , LavDec.Decorrenza AS DataDecorrenza, LavDec.idDCG_Campi, Campi.DescrizioneCampo AS TipoDecorrenza"
-           strSQL = strSQL + " , LavDec.Valore AS ValoreDecorrenza, LavDec.ValoreAgg AS ValoreAggiuntivo"
+           strSQL = strSQL + " , LavDec.Decorrenza AS DataDecorrenza, LavDec.idDCG_Campi AS CodTipoDecorrenza, Campi.DescrizioneCampo AS TipoDecorrenza"
            colNames.push('datadecorrenza');
+           colTypes.push(JSColumn.TEXT);
+           colNames.push('codtipodecorrenza');
            colTypes.push(JSColumn.TEXT);
            colNames.push('tipodecorrenza');
            colTypes.push(JSColumn.TEXT);
-           colNames.push('valoredecorrenza');
-           colTypes.push(JSColumn.TEXT);
-           colNames.push('valoreaggiuntivo');
-           colTypes.push(JSColumn.TEXT);
+           
+           if(frmOpt.vChkRegola)
+           {	           
+	           strSQL = strSQL + " , R.CodiceRegola, R.DescrizioneRegola, LavDec.ValoreAgg AS GiornoPartenzaRegola"
+	           
+	           colNames.push('codiceregola');
+	           colTypes.push(JSColumn.TEXT);
+	           colNames.push('descrizioneregola');
+	           colTypes.push(JSColumn.TEXT);
+	           colNames.push('giornopartenzaregola');
+	           colTypes.push(JSColumn.TEXT);
+           }
+           else
+           {
+        	   strSQL = strSQL + " , LavDec.Valore AS NumeroBadge"
+	           colNames.push('numerobadge');
+	           colTypes.push(JSColumn.TEXT);
+           }
         }
         
         if(frmAnag.vFilterRaggruppamento)
@@ -391,6 +405,7 @@ function createExcelFile(dittaID, dateTo, operation)
         {
            strSQL = strSQL + " LEFT OUTER JOIN F_Dec_Ditta_Periodo(?,?,?) AS LavDec ON L.idLavoratore = LavDec.id_Legato";
            strSQL = strSQL + " LEFT JOIN E2DCG_Campi Campi ON Campi.idDCG_Campi = LavDec.idDCG_Campi";
+           strSQL = strSQL + " LEFT OUTER JOIN E2Regole R ON R.idRegole = LavDec.Valore"
            sqlArr.push(idditta);
            sqlArr.push(dal);
            sqlArr.push(dal);
