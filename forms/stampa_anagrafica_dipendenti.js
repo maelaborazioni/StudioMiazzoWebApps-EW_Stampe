@@ -100,8 +100,6 @@ function stampaAnagrafica(event) {
 	}
 }
 
-
-
 /**
  * @returns Boolean
  * 
@@ -129,11 +127,9 @@ function validaOpzioni()
 			return false;
 		
 	}
-	if(frmOpt.vChkDecorrenzeAl)
-	{
-		if(frmOpt.vDecorrenzeAl === null || (!frmOpt.vChkBadge && !frmOpt.vChkRegola))
-				return false;
-	}
+	
+	if(frmOpt.vChkDecorrenzeAl && frmOpt.vArrDecorrenze.length == 0)
+		return false;
 		
 	return true;
 }
@@ -353,24 +349,31 @@ function createExcelFile(dittaID, dateTo, operation)
            colTypes.push(JSColumn.TEXT);
            colNames.push('tipodecorrenza');
            colTypes.push(JSColumn.TEXT);
+           colNames.push('valoredecorrenza');
+           colTypes.push(JSColumn.TEXT);
+           colNames.push('valoreaggiuntivo');
+           colTypes.push(JSColumn.TEXT);
            
-           if(frmOpt.vChkRegola)
-           {	           
-	           strSQL = strSQL + " , R.CodiceRegola, R.DescrizioneRegola, LavDec.ValoreAgg AS GiornoPartenzaRegola"
-	           
-	           colNames.push('codiceregola');
-	           colTypes.push(JSColumn.TEXT);
-	           colNames.push('descrizioneregola');
-	           colTypes.push(JSColumn.TEXT);
-	           colNames.push('giornopartenzaregola');
-	           colTypes.push(JSColumn.TEXT);
-           }
-           else
-           {
-        	   strSQL = strSQL + " , LavDec.Valore AS NumeroBadge"
-	           colNames.push('numerobadge');
-	           colTypes.push(JSColumn.TEXT);
-           }
+           strSQL += " , CASE WHEN LavDec.idDCG_Campi = 3 THEN R.CodiceRegola + ' (' + R.DescrizioneRegola + ')' ELSE LavDec.Valore END AS ValoreDecorrenza"
+           strSQL += " , CASE WHEN LavDec.ValoreAgg IS NULL THEN '' ELSE 'Giorno di partenza della regola : ' + LavDec.ValoreAgg END AS ValoreAggiuntivo"	   
+           
+//           if(frmOpt.vChkRegola)
+//           {	           
+//	           strSQL = strSQL + " , R.CodiceRegola, R.DescrizioneRegola, LavDec.ValoreAgg AS GiornoPartenzaRegola"
+//	           
+//	           colNames.push('codiceregola');
+//	           colTypes.push(JSColumn.TEXT);
+//	           colNames.push('descrizioneregola');
+//	           colTypes.push(JSColumn.TEXT);
+//	           colNames.push('giornopartenzaregola');
+//	           colTypes.push(JSColumn.TEXT);
+//           }
+//           else
+//           {
+//        	   strSQL = strSQL + " , LavDec.Valore AS NumeroBadge"
+//	           colNames.push('numerobadge');
+//	           colTypes.push(JSColumn.TEXT);
+//           }
         }
         
         if(frmAnag.vFilterRaggruppamento)
@@ -484,10 +487,16 @@ function createExcelFile(dittaID, dateTo, operation)
         // Filtro su decorrenze eventuale
         if(frmOpt.vChkDecorrenzeAl)
         {
-        	strSQL = strSQL + " AND (LavDec.idDCG_Campi IN (" + 
-			(frmOpt.vChkBadge == 1 ? [globals.TipoDecorrenza.BADGE,globals.TipoDecorrenza.BADGE_SOSTITUTIVO,globals.TipoDecorrenza.BADGE_OCCASIONALE].map(function(val){return val}).join(',') : globals.TipoDecorrenza.REGOLA) + "))";            
+//			var arrDec = [];
+//	        if(frmOpt.vChkRegola)
+//	        	arrDec = [globals.TipoDecorrenza.REGOLA];
+//	        else if(frmOpt.vChkBadge)
+//	        	arrDec = [globals.TipoDecorrenza.BADGE,globals.TipoDecorrenza.BADGE_SOSTITUTIVO,globals.TipoDecorrenza.BADGE_OCCASIONALE];
+//	        else
+//	        	arrDec = [globals.TipoDecorrenza.BADGE,globals.TipoDecorrenza.BADGE_SOSTITUTIVO,globals.TipoDecorrenza.BADGE_OCCASIONALE,globals.TipoDecorrenza.REGOLA,globals.TipoDecorrenza.PERC_BANCA_ORE,globals.TipoDecorrenza.PERC_RIMPIAZZO];
+	
+	        strSQL = strSQL + " AND (LavDec.idDCG_Campi IN (" +	frmOpt.vArrDecorrenze.map(function(val){return val}).join(',')	+ "))";            
         }
-
         strSQL = strSQL + " ORDER BY ISNULL(LPE.Nominativo, P.Nominativo)"
          
 		var ds = databaseManager.getDataSetByQuery(globals.Server.MA_ANAGRAFICHE,strSQL,sqlArr,-1);

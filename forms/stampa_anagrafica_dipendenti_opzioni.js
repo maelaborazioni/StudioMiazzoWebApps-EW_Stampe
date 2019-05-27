@@ -106,6 +106,20 @@ var vChkBadge = 0;
 var vChkRegola = 0;
 
 /**
+ * @type {Number}
+ *
+ * @properties={typeid:35,uuid:"F711E4C6-763F-48D9-87D6-EA7866EADC7D",variableType:4}
+ */
+var vChkFiltraDec = 0;
+
+/**
+ * @type {Array<Number>}
+ * 
+ * @properties={typeid:35,uuid:"0FCF4A89-2765-47E2-A466-BDB55AA9AE51",variableType:-4}
+ */
+var vArrDecorrenze = [globals.TipoDecorrenza.BADGE,globals.TipoDecorrenza.BADGE_SOSTITUTIVO,globals.TipoDecorrenza.BADGE_OCCASIONALE,globals.TipoDecorrenza.REGOLA,globals.TipoDecorrenza.PERC_BANCA_ORE,globals.TipoDecorrenza.PERC_RIMPIAZZO];
+
+/**
  * Handle changed data.
  *
  * @param oldValue old value
@@ -184,8 +198,9 @@ function onDataChangeDalGiorno(oldValue, newValue, event) {
 function onDataChangeDecorrenzeAl(oldValue, newValue, event) {
 	
     elements.fld_decorrenzeAlGiorno.enabled = newValue;
-    elements.chkBadge.enabled = newValue;
-    elements.chkRegola.enabled = newValue;
+//    elements.chkBadge.enabled = newValue;
+//    elements.chkRegola.enabled = newValue;
+    elements.chkFiltraDec.enabled = newValue;
     
     if(vChkInForzaAl)
     {
@@ -196,7 +211,7 @@ function onDataChangeDecorrenzeAl(oldValue, newValue, event) {
     }else
     	vDecorrenzeAl = null;
     
-    globals.ma_utl_setStatus('edit',controller.getName());
+    globals.ma_utl_setStatus(globals.Status.EDIT,controller.getName());
     	
 	return true;
 }
@@ -317,4 +332,58 @@ function onDataChangeChkRegola(oldValue, newValue, event)
 	newValue == 1 ? vChkBadge = 0 : vChkBadge = 1;
 	
 	return true
+}
+
+/**
+ * Handle changed data, return false if the value should not be accepted. In NGClient you can return also a (i18n) string, instead of false, which will be shown as a tooltip.
+ *
+ * @param {Number} oldValue old value
+ * @param {Number} newValue new value
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @return {Boolean}
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"01D6E5DB-4CB2-4C71-8269-C94087F35429"}
+ */
+function onDataChangeChkFiltraDec(oldValue, newValue, event) 
+{
+	if(newValue)
+		vArrDecorrenze = [];
+	else
+		vArrDecorrenze = [globals.TipoDecorrenza.BADGE,globals.TipoDecorrenza.BADGE_SOSTITUTIVO,globals.TipoDecorrenza.BADGE_OCCASIONALE,globals.TipoDecorrenza.REGOLA,globals.TipoDecorrenza.PERC_BANCA_ORE,globals.TipoDecorrenza.PERC_RIMPIAZZO];
+	
+	elements.btn_filtra_decorrenza.enabled = newValue;
+	
+	return true;
+}
+
+/**
+ * Filtra i tipi di decorrenza rilevanti per il cliente
+ * 
+ * @param {JSFoundset} fs
+ *
+ * @properties={typeid:24,uuid:"89E09147-D751-4658-B075-24D46F7CC995"}
+ */
+function FiltraDecRilevanteCliente(fs)
+{
+	//nel caso cliente vengono esposte solo le decorrenze rilevanti per il cliente 
+	if(globals._tipoConnessione == globals.Connessione.CLIENTE)
+	   fs.addFoundSetFilterParam('rilevantecliente','=',1);
+	return fs;
+}
+
+/**
+ * @param {Array<Number>} _recs
+ *
+ * @properties={typeid:24,uuid:"087D26A7-5960-4901-BA02-F7306A0738FC"}
+ */
+function AggiornaTipiDecorrenza(_recs)
+{
+	vArrDecorrenze = [];
+	
+	for(var d = 0; d < _recs.length; d++)
+		vArrDecorrenze.push(_recs[d]);
+	
 }
