@@ -150,6 +150,14 @@ function exportExcel(event)
 {
 	try
 	{
+		var arrLavoratori = selectLavoratori();
+		
+		if(!arrLavoratori)
+		{
+			globals.ma_utl_showWarningDialog('Selezionare almeno un dipendente!');
+			return;
+		}
+			
 		globals.ma_utl_setStatus(globals.Status.BROWSE,forms.stampa_filtri_anagrafici.controller.getName());
 		globals.svy_mod_closeForm(event);
 			
@@ -164,17 +172,28 @@ function exportExcel(event)
 		
 		// set parametri operazione
 		var frmOpt = forms.stampa_esportazione_timbrature_opzioni;
+		var frmAnag = forms.stampa_filtri_anagrafici;
+		
 		globals.startAsyncOperation
 		(
 			 createExcelFile,
-			 [idditta,frmOpt.vDallaData,frmOpt.vAllaData,frmOpt.vChkCausalizzate,frmOpt.vIdLavoratore || -1,frmOpt.vChkDatiContrattuali],
+			 [
+			  idditta
+			  ,frmOpt.vDallaData
+			  ,frmOpt.vAllaData
+			  ,frmOpt.vChkCausalizzate
+			  ,arrLavoratori.join(',')  
+			  ,frmOpt.vChkDatiContrattuali
+			  ,frmOpt.vChkDatiRaggruppamenti && frmAnag.vFilterSedeLavoro
+			  ,frmOpt.vChkDatiRaggruppamenti && frmAnag.vFilterRaggruppamento && frmAnag.vRaggruppamentoCodice == 1
+			  ,frmOpt.vChkDatiRaggruppamenti && frmAnag.vFilterRaggruppamento && frmAnag.vRaggruppamentoCodice == 2
+			  ,frmOpt.vChkDatiRaggruppamenti && frmAnag.vFilterRaggruppamento && frmAnag.vRaggruppamentoCodice == 3
+			  ],
 			 null,
 			 null,
 			 globals.OpType.SET, // stampa esportazione timbrature
 			 values
-		);
-		
-		
+		);		
 	}
 	catch(ex)
 	{
@@ -189,14 +208,18 @@ function exportExcel(event)
  * @param {Date} dateFrom
  * @param {Date} dateTo
  * @param {Boolean} causalizzate
- * @param {Number} idLavoratore
+ * @param {String} strLavoratori
  * @param {Boolean} datiContrattuali
+ * @param {Boolean} raggrSede
+ * @param {Boolean} raggrCdc
+ * @param {Boolean} raggrRagg1
+ * @param {Boolean} raggrRagg2
  * 
  * @param {JSRecord<db:/ma_log/operationlog>} operation
  * 
  * @properties={typeid:24,uuid:"81C7AE54-8883-4BDC-B3B8-8C94952430A8"}
  */
-function createExcelFile(idDitta,dateFrom,dateTo,causalizzate,idLavoratore,datiContrattuali,operation)
+function createExcelFile(idDitta,dateFrom,dateTo,causalizzate,strLavoratori,datiContrattuali,raggrSede,raggrCdc,raggrRagg1,raggrRagg2,operation)
 {
 	try
 	{
@@ -217,22 +240,27 @@ function createExcelFile(idDitta,dateFrom,dateTo,causalizzate,idLavoratore,datiC
 		/**@type Array */
 		var sqlArgs =  
 			[idDitta
-		              ,utils.dateFormat(dateFrom,globals.ISO_DATEFORMAT)
-					  ,utils.dateFormat(dateTo,globals.ISO_DATEFORMAT)
-					  ,causalizzate ? 1 : 0
-					  ,idLavoratore
-					  ,datiContrattuali ? 1 : 0];
-		        
+             ,utils.dateFormat(dateFrom,globals.ISO_DATEFORMAT)
+			 ,utils.dateFormat(dateTo,globals.ISO_DATEFORMAT)
+			 ,causalizzate ? 1 : 0
+			 ,strLavoratori
+			 ,datiContrattuali ? 1 : 0
+			 ,raggrSede ? 1 : 0
+			 ,raggrCdc ? 1: 0
+			 ,raggrRagg1 ? 1 : 0
+			 ,raggrRagg2 ? 1 : 0
+			 ];
+		
 		// array con nomi delle colonne
 		var colNames = [];
 		// array con nomi dei tipi di colonna
 		var colTypes = [];
 		
 		// query
-		var sql = "{call S_Report_Timbrature(?,?,?,?,?,?)}";
+		var sql = "{call S_Report_Timbrature_Filtrato(?,?,?,?,?,?,?,?,?,?)}";
 		
 		/** @type {Array<Number>} */
-		var typesArr = [0,0,0,0,0,0];
+		var typesArr = [0,0,0,0,0,0,0,0,0,0];
 		var ds = plugins.rawSQL.executeStoredProcedure(
 			                               globals.Server.MA_PRESENZE
 			                               ,sql
@@ -319,4 +347,40 @@ function onShow(firstShow, event)
 {	
 	plugins.busy.prepare();
 	_super.onShowForm(firstShow, event);
+}
+
+/**
+ * @return {Array}
+ * 
+ * @properties={typeid:24,uuid:"181E067D-BF49-4BDD-A3AB-072DB945C5A5"}
+ */
+function selectLavoratori()
+{
+	/** @type {Array} */
+	var iddipendenti = globals.ma_utl_showLkpWindow
+						(
+							{
+								  lookup: 'AG_Lkp_Lavoratori'// TODO foundset.tipologia === globals.Tipologia.ESTERNA ? 'AG_Lkp_LavoratoriEsterni' : 'AG_Lkp_Lavoratori'  
+								, returnForm: controller.getName()
+								, methodToAddFoundsetFilter: 'filterLavoratoriEsportazione'
+								, multiSelect: true								
+							}
+						);
+						
+	return iddipendenti;
+}
+
+/**
+ * @param {JSFoundSet} fs
+ *
+ * @properties={typeid:24,uuid:"5E7590C5-4E12-4A17-8C67-46AE45AC2291"}
+ */
+function filterLavoratoriEsportazione(fs)
+{
+	var fsLavoratori = getLavoratori(forms.stampa_esportazione_timbrature_opzioni.vDallaData
+		                             ,forms.stampa_esportazione_timbrature_opzioni.vAllaData);
+	if(fsLavoratori)
+		fs.addFoundSetFilterParam('idlavoratore','=',globals.foundsetToArray(fsLavoratori,'idlavoratore'));
+	
+	return fs;
 }

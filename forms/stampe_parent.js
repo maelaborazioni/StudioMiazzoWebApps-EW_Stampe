@@ -39,6 +39,7 @@ function onHide(event)
  */
 function annullaStampa(event)
 {
+	globals.abilitaRaggruppamenti(forms.stampa_filtri_anagrafici.controller.getName(),false);
 	gotoBrowse();	
 	globals.svy_mod_closeForm(event);
 }
@@ -112,9 +113,9 @@ function filterLavoratori(fs)
 /**
  * @properties={typeid:24,uuid:"AD021B6A-4426-46FE-AB0C-76412B5506D9"}
  */
-function getLavoratori()
+function getLavoratori(from,to)
 {
-	return forms.stampa_filtri_anagrafici.getLavoratori();
+	return forms.stampa_filtri_anagrafici.getLavoratori(from,to);
 }
 
 /**
@@ -128,11 +129,11 @@ function selectLavoratori()
 	var iddipendenti = globals.ma_utl_showLkpWindow
 						(
 							{
-								  lookup: 'AG_Lkp_Lavoratori'// TODO foundset.tipologia === globals.Tipologia.ESTERNA ? 'AG_Lkp_LavoratoriEsterni' : 'AG_Lkp_Lavoratori'  
+								  lookup: 'AG_Lkp_Lavoratori'  
 								, returnForm: controller.getName()
 								, methodToAddFoundsetFilter: 'filterLavoratori'
 								, multiSelect: true
-								, selectedElements : selectedElements
+								, selectedElements : selectedElements								
 							}
 						);
 						

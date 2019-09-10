@@ -54,7 +54,7 @@ var vPosizioniInps = null;
  *
  * @properties={typeid:35,uuid:"E51468C3-99A0-46B6-9267-EDF676F1877C"}
  */
-var vPosizioneInpsString = '';
+var vPosizioneinpsString = '';
 
 /**
  * @type {Number}
@@ -73,7 +73,7 @@ var vSediLavoro = null;
  *
  * @properties={typeid:35,uuid:"1EE5EB5D-8E2C-49EC-AE82-CE8F436BBCCC"}
  */
-var vSediLavoroString = '';
+var vSedelavoroString = '';
 
 /**
  * @type {Number}
@@ -211,8 +211,8 @@ function onDataChangeFilter(oldValue, newValue, event)
 	var splitName = elementName.split('_')[1];
 	updateStatus(splitName, newValue);
 	
-//	if(!newValue)
-//		reset(splitName[0].toUpperCase() + splitName.slice(1, splitName.length));
+	if(!newValue)
+		reset(splitName[0].toUpperCase() + splitName.slice(1, splitName.length));
 	
 	return true;
 }
@@ -233,7 +233,7 @@ function onDataChangeFilter(oldValue, newValue, event)
 function onDataChangeRaggruppamento(oldValue, newValue, event)
 {
 	vRaggruppamentiDettaglioString = '';
-	
+		
 	elements.fld_raggruppamento.enabled = newValue;
 	elements.chk_group_raggruppamento.enabled = newValue;
 	
@@ -307,7 +307,8 @@ function updateStatus(name, status)
 	 */
 	var orderName = ['chk', 'group', name].join('_');
 	elements[orderName] && (elements[orderName].enabled = status);
-	forms[controller.getName()]['vGroup' + name.substring(0,1).toUpperCase() + name.substr(1)] = elements[orderName].visible ? status : 0;
+	if(!status)
+		forms[controller.getName()]['vGroup' + name.substring(0,1).toUpperCase() + name.substr(1)] = elements[orderName].visible ? status : 0;
 }
 
 /**
@@ -335,20 +336,10 @@ function reset(name)
  */
 function filterContratto(fs)
 {
-	return filter(fs, 'SELECT DISTINCT \
-	  DC.idDitta \
-	, DC.CodContratto \
-	, GC.idGruppoContrattuale \
-FROM \
-	Ditte_Contratti DC \
-	INNER JOIN \
-		E2TabGruppiContrattuali GC \
-		ON GC.RadiceContratto = DC.CodContratto \
-WHERE \
-	DC.NonApplicato = 0',
-	[]);
-	
-	//return filter(fs, 'SELECT idGruppoContrattuale FROM [dbo].[F_Ditta_Contratti_Al](?,?)', [idditta, vDateTo]);
+	var vIdDitta = idditta;
+	if(globals.isInterinale(idditta))
+		vIdDitta = globals.getDittaRiferimento(idditta);
+	return filter(fs, 'SELECT idGruppoContrattuale FROM [dbo].[F_Ditta_Contratti_Al](?,?)', [vIdDitta, vDateTo]);
 }
 
 /**
@@ -358,14 +349,10 @@ WHERE \
  */
 function filterQualifica(fs)
 {
-	return filter(fs, 'SELECT DISTINCT \
-	Q.idTabQualifiche \
-FROM \
-	Lavoratori L \
-	INNER JOIN E2TabQualifiche Q \
-		ON Q.RadiceQualifica = L.CodQualifica',
-		[]);
-	//return filter(fs, 'SELECT idTabQualifiche FROM [dbo].[F_Ditta_Qualifiche_Al](?,?)', [idditta, vDateTo]);
+	var vIdDitta = idditta;
+	if(globals.isInterinale(idditta))
+		vIdDitta = globals.getDittaRiferimento(idditta);
+	return filter(fs, 'SELECT idTabQualifiche FROM [dbo].[F_Ditta_Qualifiche_Al](?,?)', [vIdDitta, vDateTo]);
 }
 
 /**
@@ -375,12 +362,10 @@ FROM \
  */
 function filterPosizioneInps(fs)
 {
-	return filter(fs, 'SELECT DISTINCT \
-	DI.idDittaInps \
-FROM \
-	Ditte_Inps DI',
-	[]);
-//	return filter(fs, 'SELECT idDittaInps FROM [dbo].[F_Ditta_PosizioneInps_Al](?,?)', [idditta, vDateTo]);
+	var vIdDitta = idditta;
+	if(globals.isInterinale(idditta))
+		vIdDitta = globals.getDittaRiferimento(idditta);
+	return filter(fs, 'SELECT idDittaInps FROM [dbo].[F_Ditta_PosizioneInps_Al](?,?)', [vIdDitta, vDateTo]);
 }
 
 /**
@@ -390,8 +375,10 @@ FROM \
  */
 function filterSedeLavoro(fs)
 {
-	fs = filter(fs, 'SELECT DISTINCT DS.idDittaSede FROM Ditte_Sedi DS',[]);
-//	fs = filter(fs, 'SELECT idDittaSede FROM [dbo].[F_Ditta_Sedi_Al](?,?)', [idditta, vDateTo]);
+	var vIdDitta = idditta;
+	if(globals.isInterinale(idditta))
+		vIdDitta = globals.getDittaRiferimento(idditta);
+	fs = filter(fs, 'SELECT idDittaSede FROM [dbo].[F_Ditta_Sedi_Al](?,?)', [vIdDitta, vDateTo]);
 	fs.addFoundSetFilterParam('codtiposede', globals.ComparisonOperator.EQ, globals.codSEDEOPERATIVA);
 	
 	return fs;
@@ -421,8 +408,9 @@ function filterRaggruppamento(fs)
 	    return null;
 	}
 	
-	return filter(fs, 'SELECT DISTINCT idDettaglio FROM V_Ditte_Raggruppamenti_Dettaglio RD WHERE RD.CodTipoCampo = ?',[vRaggruppamentoTipoCampo]);
-//	return filter(fs, 'SELECT idDettaglio FROM [dbo].[F_Ditta_Raggruppamenti_Al](?,?,?)', [idditta, vDateTo, vRaggruppamentoTipoCampo]);
+	return filter(fs
+				  , 'SELECT idDettaglio FROM [dbo].[F_Ditta_Raggruppamenti_Al](?,?,?)'
+				  , [idditta, vDateTo, vRaggruppamentoTipoCampo]);
 }
 
 /**
@@ -432,7 +420,9 @@ function filterRaggruppamento(fs)
  */
 function filterRaggruppamentoDettaglio(fs)
 {
-	fs.addFoundSetFilterParam('iddittaclassificazione','IN',vIdDittaClassificazione);
+	fs.addFoundSetFilterParam('iddittaclassificazione'
+		                      ,'IN'
+							  ,vIdDittaClassificazione);
 	return fs;
 	
 //	return filter(fs
@@ -522,7 +512,7 @@ function updatePosizioneInps(records)
 			}
 		);
 		
-		vPosizioneInpsString = temp.join('\n');
+		vPosizioneinpsString = temp.join('\n');
 		vPosizioniInps = records.map(function(record){ return record.posizioneinps; });
 	}
 }
@@ -545,7 +535,7 @@ function updateSedeLavoro(records)
 			}
 		);
 		
-		vSediLavoroString = temp.join('\n');
+		vSedelavoroString = temp.join('\n');
 		vSediLavoro = records.map(function(record){ return record.iddittasede; });
 	}
 }
@@ -724,7 +714,8 @@ function getLavoratori(from,to)
 	{
 		fs.idditta = globals.foundsetToArray(foundset,'idditta');//idditta;
 		
-		//fs.assunzione = 
+		fs.assunzione = '<=' + globals.dateFormat(to,globals.ISO_DATEFORMAT) + '|yyyyMMdd';
+		fs.cessazione = '^||>=' + globals.dateFormat(from,globals.ISO_DATEFORMAT) + '|yyyyMMdd'
 		
 		if(frmStampaFiltriAnag.vFilterRaggruppamento)
 			fs.lavoratori_to_lavoratori_classificazioni.codtipoclassificazione = vRaggruppamentoCodice;
@@ -736,6 +727,10 @@ function getLavoratori(from,to)
 			fs.codqualifica = vQualifica;
 		if(frmStampaFiltriAnag.vFilterPosizioneInps)
 			fs.posizioneinps = vPosizioniInps;
+		// filtro sedi di lavoro
+		if(frmStampaFiltriAnag.vFilterSedeLavoro)
+			fs.iddittasede = vSediLavoro;
+
 		if(frmStampaFiltriAnag.vFilterGroupLavoratori)
 		{
 			if(vDateTo == null)
@@ -752,8 +747,7 @@ function getLavoratori(from,to)
 			
 	        var arrLavGruppo = globals.getLavoratoriGruppo(params,params.idditta);
 	        fs.addFoundSetFilterParam('idlavoratore',globals.ComparisonOperator.IN,arrLavGruppo);
-	        
-		}
+	    }
 		
 		fs.search(); 
 				

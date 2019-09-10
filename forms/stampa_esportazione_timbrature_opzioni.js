@@ -34,6 +34,13 @@ var vChkCausalizzate = 0;
 
 /**
  * @type {Number}
+ *
+ * @properties={typeid:35,uuid:"02E78314-F2EC-4384-AE30-881CA011533C",variableType:4}
+ */
+var vChkDatiRaggruppamenti = 1;
+
+/**
+ * @type {Number}
  * 
  * @properties={typeid:35,uuid:"F4096BFB-844C-4185-86D1-27C23B87FB85",variableType:8}
  */
@@ -77,10 +84,13 @@ function selectLavoratore()
 function filterLavoratore(fs)
 {
 	var frm = forms.stampa_esportazione_timbrature;
-	var arrLavInForza = globals.getLavoratoriDalAl(vDallaData,vAllaData);
-	fs.addFoundSetFilterParam('idditta','=',frm.idditta);
-	fs.addFoundSetFilterParam('idlavoratore','IN',arrLavInForza);
 	
+	var fsLavInForza = frm.getLavoratori(vDallaData,vAllaData);
+	if(fsLavInForza)
+	{
+		fs.addFoundSetFilterParam('idditta','=',frm.idditta);
+		fs.addFoundSetFilterParam('idlavoratore','IN',globals.foundsetToArray(fsLavInForza,'idlavoratore'));
+	}
 	return fs;
 }
 
@@ -152,7 +162,9 @@ function validaOptions()
  */
 function onShow(firstShow, event) 
 {
-	if(!scopes.giornaliera.haTimbratureCausalizzate(forms.stampa_esportazione_timbrature.idditta))
+	var idDittaSel = globals.isInterinale(forms.stampa_esportazione_timbrature.idditta) ? globals.getDittaRiferimento(forms.stampa_esportazione_timbrature.idditta) : forms.stampa_esportazione_timbrature.idditta;
+	
+	if(!scopes.giornaliera.haTimbratureCausalizzate(idDittaSel))
 	{
 		elements.chk_causalizzate.enabled = 
 			elements.lbl_causalizzate.enabled = false;

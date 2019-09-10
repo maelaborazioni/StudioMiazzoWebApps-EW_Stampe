@@ -20,7 +20,7 @@ function stampaGiornaliera()
 		params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
 			
 	globals.stampaGiornalieraDitta(params);
-	
+		
 	return true;
 }
 

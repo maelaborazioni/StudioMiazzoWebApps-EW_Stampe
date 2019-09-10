@@ -31,11 +31,11 @@ var vFormat = 1;
  */
 function onShow(firstShow, event) 
 {	
-	plugins.busy.prepare();
-	_super.onShowForm(firstShow, event);
+	if(firstShow)
+		vFormat = globals.FileFormats.EXCEL;
 	
-	// per il momento è disponibile solo l'excel
-	vFormat = globals.FileFormats.EXCEL;
+	plugins.busy.prepare();
+	_super.onShowForm(firstShow, event);		
 }
 
 /**
@@ -189,7 +189,36 @@ function process_export_excel(event)
  */
 function exportReport(event)
 {
-	
+	try
+	{
+		globals.ma_utl_setStatus(globals.Status.BROWSE,forms.stampa_filtri_anagrafici.controller.getName());
+		globals.svy_mod_closeForm(event);
+			
+		var vDate = new Date();
+		var values = 
+		{
+			op_hash		: utils.stringMD5HashBase64(idditta + vDate.toString()),
+			op_ditta	: idditta,
+			op_message	: 'Esportazione in corso...',
+			op_periodo 	: utils.dateFormat(vDate, globals.PERIODO_DATEFORMAT)
+		};
+		
+		globals.startAsyncOperation
+		(
+			 createReport,
+			 [_idditta,new Date()],
+			 null,
+			 null,
+			 globals.OpType.EWEA,
+			 values
+		);
+		
+		
+	}
+	catch(ex)
+	{
+		application.output(ex,LOGGINGLEVEL.ERROR);
+	}
 }
 
 /**
@@ -324,7 +353,7 @@ function createExcelFile(dittaID, dateTo, operation)
         strSQL = strSQL + " , LJ.CodLivello AS Livello, L.Assunzione AS DataAssunzione, L.Cessazione AS DataCessazione"
         strSQL = strSQL + " , L.ScadenzaContratto AS ScadenzaContratto, L.AnzConvenzionale AS DataAnzianitaTFR, L.AnzContributiva AS DataAnzianitaContributiva"
         strSQL = strSQL + " , L.CodContrattoInserimento AS CodContrInserim, TCIns.Descrizione AS DescContrInserim"
-        strSQL = strSQL + " , ISNULL(LPE.Nascita_Data, P.Nascita_Data) AS DataNascita, L.CodiceFiscale"
+        strSQL = strSQL + " , ISNULL(LPE.Nascita_Data, P.Nascita_Data) AS DataNascita, ISNULL(L.CodiceFiscale,LPE.CodiceFiscale) AS CodiceFiscale"
         strSQL = strSQL + " , ISNULL(RTRIM(TCINas.Descrizione) + ' (' + TCINas.Provincia + ')', RTRIM(TSENas.Descrizione) + ' (EE)') AS LuogoNascita"
         strSQL = strSQL + " , RTRIM(LDA.INDIRIZZO) + ' - ' + CAST(LDA.CAP AS VarChar) + ' ' + RTRIM(LDA.Comune) + ' (' + LDA.Provincia + ')' AS Indirizzo"
 		strSQL = strSQL + " , L.PosizioneInps"
@@ -356,32 +385,18 @@ function createExcelFile(dittaID, dateTo, operation)
            
            strSQL += " , CASE WHEN LavDec.idDCG_Campi = 3 THEN R.CodiceRegola + ' (' + R.DescrizioneRegola + ')' ELSE LavDec.Valore END AS ValoreDecorrenza"
            strSQL += " , CASE WHEN LavDec.ValoreAgg IS NULL THEN '' ELSE 'Giorno di partenza della regola : ' + LavDec.ValoreAgg END AS ValoreAggiuntivo"	   
-           
-//           if(frmOpt.vChkRegola)
-//           {	           
-//	           strSQL = strSQL + " , R.CodiceRegola, R.DescrizioneRegola, LavDec.ValoreAgg AS GiornoPartenzaRegola"
-//	           
-//	           colNames.push('codiceregola');
-//	           colTypes.push(JSColumn.TEXT);
-//	           colNames.push('descrizioneregola');
-//	           colTypes.push(JSColumn.TEXT);
-//	           colNames.push('giornopartenzaregola');
-//	           colTypes.push(JSColumn.TEXT);
-//           }
-//           else
-//           {
-//        	   strSQL = strSQL + " , LavDec.Valore AS NumeroBadge"
-//	           colNames.push('numerobadge');
-//	           colTypes.push(JSColumn.TEXT);
-//           }
         }
-        
+                
         if(frmAnag.vFilterRaggruppamento)
         {
-        	strSQL = strSQL + " , LR.CodClassificazione, DCD.Descrizione";
-        	colNames.push('codclassificazione');
+        	strSQL = strSQL + " , CL.Codice, CL.Descrizione , CL.CodDettaglio , CL.DescDettaglio";
+        	colNames.push('codice');
         	colTypes.push(JSColumn.TEXT);
-        	colNames.push('descrizioneclassificazione');
+        	colNames.push('descrizione');
+        	colTypes.push(JSColumn.TEXT);
+        	colNames.push('coddettaglio');
+        	colTypes.push(JSColumn.TEXT);
+        	colNames.push('descdettaglio');
         	colTypes.push(JSColumn.TEXT);
         }
         
@@ -416,8 +431,30 @@ function createExcelFile(dittaID, dateTo, operation)
         
         if(frmAnag.vFilterRaggruppamento)
         {
-        	strSQL = strSQL + " LEFT OUTER JOIN Lavoratori_Classificazioni LR ON LR.idLavoratore = L.idLavoratore";
-           	strSQL = strSQL + " LEFT OUTER JOIN Ditte_ClassificazioniDettaglio DCD ON LR.CodClassificazione = DCD.Codice";
+        	strSQL = strSQL + " INNER JOIN \
+								 (\
+									SELECT \
+								   LC.idLavoratoreClassificazione \
+								   , LC.idLavoratore \
+								   , LC.idDitta \
+								   , DC.Codice \
+								   , DC.Descrizione \
+								   , DC.DescrizioneSostitutiva \
+								   , DCD.Codice AS CodDettaglio \
+								   , DCD.Descrizione AS DescDettaglio \
+								   , DCD.idDittaClassificazioneDettaglio \
+								FROM \
+									Lavoratori_Classificazioni LC \
+                                    INNER JOIN Ditte_ClassificazioniDettaglio DCD ON DCD.Codice = LC.CodClassificazione \
+                                    INNER JOIN Ditte_Classificazioni DC ON DCD.idDittaClassificazione = DC.idDittaClassificazione AND DC.idDitta = LC.idDitta \
+									WHERE LC.idDitta = " + idditta + " \
+									AND LC.CodTipoClassificazione = " + frmAnag.vRaggruppamentoCodice + " AND LC.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+									AND DC.Codice = " + frmAnag.vRaggruppamentoCodice + " \
+									AND DCD.Codice IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+								 ) AS CL ON CL.idLavoratore = L.idLavoratore ";
+        	
+//        	strSQL = strSQL + " LEFT OUTER JOIN Lavoratori_Classificazioni LR ON LR.idLavoratore = L.idLavoratore";
+//           	strSQL = strSQL + " LEFT OUTER JOIN Ditte_ClassificazioniDettaglio DCD ON LR.CodClassificazione = DCD.Codice";
         }
         strSQL = strSQL + " LEFT OUTER JOIN Ditte_Sedi DS ON L.idDittaSede = DS.idDittaSede"
 		strSQL = strSQL + " WHERE D.idDitta = ?"
@@ -428,23 +465,23 @@ function createExcelFile(dittaID, dateTo, operation)
 			strSQL = strSQL + " AND L.RadiceContratto IN (" + frmAnag.vContratto.join(',') + ")";
 		
 		if(frmAnag.vFilterQualifica)
-			strSQL = strSQL + " AND L.RadiceQualifica IN (" + frmAnag.vQualifica.join(',') + ")";
+			strSQL = strSQL + " AND L.CodQualifica IN (" + frmAnag.vQualifica.join(',') + ")";
 		
 		if(frmAnag.vFilterPosizioneInps)
 			strSQL = strSQL + " AND L.PosizioneInps IN (" + frmAnag.vPosizioniInps.join(',') + ")";
 		
 		if(frmAnag.vFilterSedeLavoro)
-			strSQL = strSQL + " AND DS.Codice IN (" + frmAnag.vSediLavoro.join(',') + ")";
+			strSQL = strSQL + " AND DS.idDittaSede IN (" + frmAnag.vSediLavoro.join(',') + ")";
 		
-		if(frmAnag.vFilterRaggruppamento)
-		{
-			strSQL = strSQL + " AND LR.CodTipoClassificazione = ?"
-			sqlArr.push(frmAnag.vRaggruppamentoCodice);
-		    
-			if(frmAnag.vRaggruppamentiDettaglio && frmAnag.vRaggruppamentiDettaglio.length > 0)
-				strSQL = strSQL + " AND LR.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ")";
-		
-		}
+//		if(frmAnag.vFilterRaggruppamento)
+//		{
+//			strSQL = strSQL + " AND LR.CodTipoClassificazione = ?"
+//			sqlArr.push(frmAnag.vRaggruppamentoCodice);
+//		    
+//			if(frmAnag.vRaggruppamentiDettaglio && frmAnag.vRaggruppamentiDettaglio.length > 0)
+//				strSQL = strSQL + " AND LR.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ")";
+//		
+//		}
                 
         // gestione opzioni di "in forza al"
 		if (frmOpt.vChkInForzaAl) 
@@ -497,6 +534,20 @@ function createExcelFile(dittaID, dateTo, operation)
 	
 	        strSQL = strSQL + " AND (LavDec.idDCG_Campi IN (" +	frmOpt.vArrDecorrenze.map(function(val){return val}).join(',')	+ "))";            
         }
+        
+        // applica filtri su dipendenti in ingresso
+		if(!globals.ma_utl_hasKey(globals.Key.AUT_GESTORE))
+		{
+			var arrLavFiltratiInclusi = globals.getLavoratoriFiltri(false);
+			var arrLavFiltratiEsclusi = globals.getLavoratoriFiltri(true);
+			
+			if(arrLavFiltratiInclusi && arrLavFiltratiInclusi.length)
+				strSQL = strSQL.concat(' AND L.idLavoratore IN (' + arrLavFiltratiInclusi.join(',') + ')');
+			
+			if(arrLavFiltratiEsclusi && arrLavFiltratiEsclusi.length)
+				strSQL = strSQL.concat(' AND L.idLavoratore NOT IN (' + arrLavFiltratiEsclusi.join(',') + ')');
+		}
+        
         strSQL = strSQL + " ORDER BY ISNULL(LPE.Nominativo, P.Nominativo)"
          
 		var ds = databaseManager.getDataSetByQuery(globals.Server.MA_ANAGRAFICHE,strSQL,sqlArr,-1);
@@ -552,4 +603,291 @@ function createExcelFile(dittaID, dateTo, operation)
 		forms.mao_history.checkStatusCallback(retObj);
 		forms.mao_history.operationDone(retObj);
 	}
+}
+
+/**
+ * @AllowToRunInFind
+ * 
+ * Popola e genera il file pdf di report con i dati richiesti
+ * 
+ * @param {Number} dittaID
+ * @param {Date} dateTo
+ * @param {JSRecord<db:/ma_log/operationlog>} operation
+ *
+ * @properties={typeid:24,uuid:"C186DECF-E0B6-435C-95E8-343F9D046B95"}
+ * @SuppressWarnings(wrongparameters)
+ */
+function createReport(dittaID, dateTo, operation)
+{
+	try
+	{
+		/**
+		 * Make sure some date is set
+		 */
+		var vDateTo = globals.TODAY;
+		
+		// LOG per inizio recupero dati
+//		operation.op_message = 'Inizio estrazione dati';
+//		operation.op_end = new Date();
+//		operation.op_status = globals.OpStatus.ONGOING;
+//		operation.op_progress = 10;
+		
+		var fileName = ['Elenco_Anagrafiche', 'Periodo', utils.dateFormat(vDateTo, globals.PERIODO_DATEFORMAT)].join('_');
+		
+		// parametro relativo ad impostazione titolo del report
+		var pTitolo = '';
+		
+		// form opzioni anagrafica
+		var frmAnag = forms.stampa_filtri_anagrafici;
+		
+		// form opzioni di stampa
+		var frmOpt = forms.stampa_anagrafica_dipendenti_opzioni;
+		var dal,al = null;
+		if(frmOpt.vChkInForzaAl)
+		{
+			pTitolo += ' In forza al ' + globals.dateFormat(frmOpt.vInForzaAlGiorno,globals.EU_DATEFORMAT);
+			
+			if(frmOpt.vChkInForzaAlGiorno)
+			{
+				dal = frmOpt.vInForzaAlGiorno;
+				al = frmOpt.vInForzaAlGiorno;
+			}
+			else
+			{
+			 	dal = new Date(frmOpt.vInForzaAlMese.getFullYear(),frmOpt.vInForzaAlMese.getMonth(),1);
+			 	al = new Date(frmOpt.vInForzaAlMese.getFullYear()
+			 		          ,frmOpt.vInForzaAlMese.getMonth()
+							  ,globals.getTotGiorniMese(frmOpt.vInForzaAlMese.getMonth() + 1,frmOpt.vInForzaAlMese.getFullYear()));
+			}
+				
+		}
+		else if(frmOpt.vChkAssunti || frmOpt.vChkDimessi || frmOpt.vChkCtrScadenza)
+		{
+			if(frmOpt.vChkAssunti)
+				pTitolo += 'Assunti ';
+			if(frmOpt.vChkDimessi)
+				pTitolo += 'Dimessi ';
+			if(frmOpt.vChkCtrScadenza)
+				pTitolo += 'In scadenza ';
+			
+			pTitolo = 'dal ' + globals.dateFormat(frmOpt.vDalGiorno,globals.EU_DATEFORMAT) + 
+					  ' al ' + globals.dateFormat(frmOpt.vAlGiorno,globals.EU_DATEFORMAT);
+			
+			dal = frmOpt.vDalGiorno;
+			al = frmOpt.vAlGiorno;
+		}
+		else if(frmOpt.vChkDecorrenzeAl)
+		{ 
+			dal = frmOpt.vDecorrenzeAl;
+			al = frmOpt.vDecorrenzeAl;
+		}
+		else
+		{
+			dal = globals.TODAY;
+			al = globals.TODAY;
+		}
+		
+		// array di parametri
+		var sqlArr = [];
+		
+		// array con nomi delle colonne
+		var colNames = ['codditta','ragionesociale','cod_sedelavoro','sedelavoro','coddipendente','nominativo','qualifica','livello',
+		                'dataassunzione','datacessazione','scadenzacontratto','datanascita'];
+		var colTypes = [JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,JSColumn.TEXT,
+		                JSColumn.DATETIME,JSColumn.DATETIME,JSColumn.DATETIME,JSColumn.DATETIME];
+		
+		// query originale Epi2
+		var strSQL = "SELECT "
+        strSQL = strSQL + " D.Codice as CodDitta, D.RagioneSociale, DS.Codice AS Cod_SedeLavoro, DS.Descrizione AS SedeLavoro"
+        strSQL = strSQL + " , L.CodDipendente, ISNULL(LPE.Nominativo, P.Nominativo) AS Nominativo"
+        strSQL = strSQL + " , TQ.Descrizione AS Qualifica"
+        strSQL = strSQL + " , LJ.CodLivello AS Livello, L.Assunzione AS DataAssunzione, L.Cessazione AS DataCessazione"
+        strSQL = strSQL + " , L.ScadenzaContratto AS ScadenzaContratto"
+        strSQL = strSQL + " , ISNULL(LPE.Nascita_Data, P.Nascita_Data) AS DataNascita"
+             
+        if(frmAnag.vFilterRaggruppamento)
+        {
+        	strSQL = strSQL + " , CL.Codice AS raggr_codice, CL.Descrizione as raggr_descrizione, CL.CodDettaglio as raggr_coddettaglio, CL.DescDettaglio as raggr_descdettaglio";
+        	colNames.push('codice');
+        	colTypes.push(JSColumn.TEXT);
+        	colNames.push('descrizione');
+        	colTypes.push(JSColumn.TEXT);
+        	colNames.push('coddettaglio');
+        	colTypes.push(JSColumn.TEXT);
+        	colNames.push('descdettaglio');
+        	colTypes.push(JSColumn.TEXT);
+        }
+                
+        strSQL = strSQL + " FROM V_Lavoratori L"
+		strSQL = strSQL + " LEFT OUTER JOIN Persone P ON L.CodiceFiscale = P.CodiceFiscale"
+        strSQL = strSQL + " LEFT OUTER JOIN Lavoratori_JOB LJ ON L.idLavoratore = LJ.idLavoratore"
+        strSQL = strSQL + " LEFT OUTER JOIN E2TabQualifiche TQ ON TQ.RadiceQualifica = L.CodQualifica"
+        strSQL = strSQL + " LEFT OUTER JOIN Ditte D ON L.idDitta = D.idDitta"
+        strSQL = strSQL + " LEFT OUTER JOIN Lavoratori_PersoneEsterne LPE ON L.idLavoratore = LPE.idLavoratore"
+               
+        if(frmAnag.vFilterRaggruppamento)
+        {
+        	strSQL = strSQL + " INNER JOIN \
+								 (\
+									SELECT \
+								   LC.idLavoratoreClassificazione \
+								   , LC.idLavoratore \
+								   , LC.idDitta \
+								   , DC.Codice \
+								   , DC.Descrizione \
+								   , DC.DescrizioneSostitutiva \
+								   , DCD.Codice AS CodDettaglio \
+								   , DCD.Descrizione AS DescDettaglio \
+								FROM \
+									Lavoratori_Classificazioni LC \
+                                    INNER JOIN Ditte_ClassificazioniDettaglio DCD ON DCD.Codice = LC.CodClassificazione \
+                                    INNER JOIN Ditte_Classificazioni DC ON DCD.idDittaClassificazione = DC.idDittaClassificazione AND DC.idDitta = LC.idDitta \
+									WHERE LC.idDitta = " + idditta + " \
+									AND LC.CodTipoClassificazione = " + frmAnag.vRaggruppamentoCodice + " AND LC.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+									AND DC.Codice = " + frmAnag.vRaggruppamentoCodice + " \
+									AND DCD.Codice IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+								 ) AS CL ON CL.idLavoratore = L.idLavoratore ";
+      	
+        }
+        strSQL = strSQL + " LEFT OUTER JOIN Ditte_Sedi DS ON L.idDittaSede = DS.idDittaSede"
+		strSQL = strSQL + " WHERE D.idDitta = ?"
+		
+		sqlArr.push(idditta);
+		
+		if(frmAnag.vFilterContratto)
+			strSQL = strSQL + " AND L.RadiceContratto IN (" + frmAnag.vContratto.join(',') + ")";
+		
+		if(frmAnag.vFilterQualifica)
+			strSQL = strSQL + " AND L.CodQualifica IN (" + frmAnag.vQualifica.join(',') + ")";
+		
+		if(frmAnag.vFilterPosizioneInps)
+			strSQL = strSQL + " AND L.PosizioneInps IN (" + frmAnag.vPosizioniInps.join(',') + ")";
+		
+		if(frmAnag.vFilterSedeLavoro)
+			strSQL = strSQL + " AND DS.idDittaSede IN (" + frmAnag.vSediLavoro.join(',') + ")";
+                
+        // gestione opzioni di "in forza al"
+		if (frmOpt.vChkInForzaAl) 
+		{
+			strSQL = strSQL.concat(' AND ((L.Cessazione >= ? OR L.Cessazione IS NULL) AND L.Assunzione <= ?) ');
+			
+			if (frmOpt.vChkInForzaAlGiorno) 
+			{
+				sqlArr.push(dal);
+			    sqlArr.push(al);
+			}
+			else
+			{
+				var periodo = frmOpt.vInForzaAlMese.getFullYear() * 100 + frmOpt.vInForzaAlMese.getMonth() + 1;
+				/** @type {Date} */
+				var ultimoGGMese = globals.getLastDatePeriodo(periodo);
+				sqlArr.push(dal);
+				sqlArr.push(ultimoGGMese);
+			}
+		}
+		
+		// gestione opzioni di "assunti/dimessi/licenziati"
+		if (frmOpt.vChkAssunti)
+		{
+			strSQL = strSQL.concat(' AND L.Assunzione BETWEEN ? AND ? ');
+			sqlArr.push(dal);
+			sqlArr.push(al);
+		}
+		if (frmOpt.vChkDimessi) 
+		{
+			strSQL = strSQL.concat(' AND L.Cessazione BETWEEN ? AND ? ');
+			sqlArr.push(dal);
+			sqlArr.push(al);
+		}
+		if (frmOpt.vChkCtrScadenza) {
+			strSQL = strSQL.concat(' AND L.Scadenzacontratto BETWEEN ? AND ? ');
+			sqlArr.push(dal);
+			sqlArr.push(al);
+		}
+        
+		// applica filtri su dipendenti in ingresso
+		if(!globals.ma_utl_hasKey(globals.Key.AUT_GESTORE))
+		{
+			var arrLavFiltratiInclusi = globals.getLavoratoriFiltri(false);
+			var arrLavFiltratiEsclusi = globals.getLavoratoriFiltri(true);
+			
+			if(arrLavFiltratiInclusi && arrLavFiltratiInclusi.length)
+				strSQL = strSQL.concat(' AND L.idLavoratore IN (' + arrLavFiltratiInclusi.join(',') + ')');
+			
+			if(arrLavFiltratiEsclusi && arrLavFiltratiEsclusi.length)
+				strSQL = strSQL.concat(' AND L.idLavoratore NOT IN (' + arrLavFiltratiEsclusi.join(',') + ')');
+		}
+			
+        strSQL = strSQL + " ORDER BY "
+		
+        if(frmAnag.vFilterRaggruppamento)
+        	strSQL = strSQL + " raggr_coddettaglio, ";
+        
+        strSQL = strSQL + " ISNULL(LPE.Nominativo, P.Nominativo)"
+         
+		var ds = databaseManager.getDataSetByQuery(globals.Server.MA_ANAGRAFICHE,strSQL,sqlArr,-1);
+				
+		// creazione foundset corrispondente
+		var fs = databaseManager.getFoundSet(ds.createDataSource('dS_ElencoAnagrafiche_' + application.getUUID(),colTypes));
+		fs.loadAllRecords();
+		
+		var reportParams = new Object();
+		reportParams.ptitolo = pTitolo;
+		
+		globals.createReportWithFoundset(fs,reportParams,'Elenco_Anagrafiche_Periodo.jasper',fileName + '.pdf',operation)
+		
+	}
+	catch(ex)
+	{
+		application.output(ex, LOGGINGLEVEL.ERROR);
+	}
+	finally
+	{
+		/**
+		 * Remove all created files and commit the transaction
+		 */
+		plugins.file.deleteFolder(globals.SERVER_TMPDIR.replace(/\\/g,'/') + '/export/', false);
+		databaseManager.commitTransaction();
+		
+		var retObj = {status : operation};
+		forms.mao_history.checkStatusCallback(retObj);
+		forms.mao_history.operationDone(retObj);
+	}
+}
+/**
+ * Handle changed data, return false if the value should not be accepted. In NGClient you can return also a (i18n) string, instead of false, which will be shown as a tooltip.
+ *
+ * @param {Number} oldValue old value
+ * @param {Number} newValue new value
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @return {Boolean}
+ *
+ * @private
+ *
+ * @properties={typeid:24,uuid:"91799F02-E26D-49F6-9F6E-34CAAE01EDE9"}
+ */
+function onDataChangeChkFormat(oldValue, newValue, event) 
+{
+	var frmOpt = forms.stampa_anagrafica_dipendenti_opzioni;
+	var elems = frmOpt.elements;
+	
+	elems.chkDecorrenzeAl.enabled =
+		elems.lbl_decorrenzeAl.enabled =
+			elems.lbl_decorrenza.enabled =
+				elems.fld_decorrenzeAlGiorno.enabled =
+					elems.chkFiltraDec.enabled =
+						elems.lblFiltraDec.enabled = 
+							elems.btn_filtra_decorrenza.enabled = 
+								elems.btn_decorrenzeAl.enabled = 
+									newValue;
+	
+	if(newValue)
+	{
+		frmOpt.vChkDecorrenzeAl = 
+			frmOpt.vChkFiltraDec = 0;
+		frmOpt.vDecorrenzeAl = null;		
+	}
+	
+	return true;
 }

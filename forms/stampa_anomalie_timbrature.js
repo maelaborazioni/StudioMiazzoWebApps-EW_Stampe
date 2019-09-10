@@ -13,7 +13,7 @@ function stampaAnomalieTimbrature()
 	var iddipendenti = selectLavoratori();
 	if(!iddipendenti || iddipendenti.length === 0)
 		return false; 
-	
+		
 	var params = forms.stampa_anomalie_timbrature_opzioni.getOptions();
 	    params['idditta'] = idditta;
 	    params['iddipendenti'] = iddipendenti;
@@ -24,10 +24,10 @@ function stampaAnomalieTimbrature()
 		params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
 		params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
 	    
-	    var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaAnomalieTimbrature";
-	    globals.addJsonWebServiceJob(url,params);
+	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaAnomalieTimbrature";
+    globals.addJsonWebServiceJob(url,params);
 	    
-	    return true;	
+    return true;	
 }
 
 /**

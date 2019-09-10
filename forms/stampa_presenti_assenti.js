@@ -28,7 +28,19 @@ function stampaPresentiAssenti()
 		return false;
 	
 	var params = forms.stampa_presenti_assenti_opzioni.getOptions();
-	    params['idgruppoinstallazione'] = -1;
+	
+	if(!params.almomento)
+	{
+		var dataUltimaAcquisizione = globals.getDataUltimoScarico(globals.getDitte());
+		var msg = 'L\'ultima acquisizione delle timbrature é avvenuta il giorno ' + globals.dateFormat(dataUltimaAcquisizione,globals.EU_DATEFORMAT) + 
+		          ' alle ore ' + globals.dateFormat(dataUltimaAcquisizione,globals.OREMINUTI_DATEFORMAT) + '.<br/>' +
+				  'Si desidera proseguire con il report?';
+        var answer = globals.ma_utl_showYesNoQuestion(msg,'Stampa presenti assenti');
+        if(!answer)
+        	return answer;
+	}
+		
+	params['idgruppoinstallazione'] = -1;
 	    params['iddipendenti'] = [];
 	    params['bexcel'] = vFormat;
 	    params['periodo'] = globals.toPeriodo(globals.TODAY.getFullYear(),globals.TODAY.getMonth()+1);

@@ -12,6 +12,8 @@ function stampaSituazioneEventiLunghi()
 	if(!iddipendenti || iddipendenti.length === 0)
 		return false;
 	
+	iddipendenti = scopes.lavoratori.sortByNominativo(iddipendenti,globals.getTipologiaDitta(idditta));
+	
 	var params = forms.stampa_situazione_eventi_lunghi_opzioni.getOptions();
 		params.idditta = idditta;
 		params.iddipendenti = iddipendenti;

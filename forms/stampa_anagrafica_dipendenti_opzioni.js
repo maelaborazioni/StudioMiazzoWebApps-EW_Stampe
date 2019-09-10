@@ -68,6 +68,12 @@ var vChkDalGiorno = 0;
  */
 var vChkAlGiorno = 0;
 /**
+ * @type {Number}
+ *
+ * @properties={typeid:35,uuid:"55C52D85-E538-408D-BCB7-A7AA339DD73A",variableType:4}
+ */
+var vChkDatiRecapiti = 0;
+/**
  * @type {Date}
  * 
  * @properties={typeid:35,uuid:"EB9E141E-2808-4CF0-83BE-0A0F32522BB2",variableType:93}

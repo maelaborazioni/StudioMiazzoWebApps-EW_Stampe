@@ -15,7 +15,7 @@ function stampaCartolinaPresenze()
 	var iddipendenti = selectLavoratori();
 	if(!iddipendenti || iddipendenti.length === 0)
 		return false;
-		
+	
 	var params = forms.stampa_cartolina_presenze_opzioni.getOptions();
 		params['idditta'] = idditta;
 		params['iddipendenti'] = iddipendenti;

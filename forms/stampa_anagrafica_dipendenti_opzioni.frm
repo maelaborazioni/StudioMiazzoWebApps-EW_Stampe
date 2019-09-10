@@ -12,6 +12,15 @@ typeid:4,
 uuid:"0574C6FC-A655-4AB7-AC1C-2344217F40E2"
 },
 {
+location:"30,220",
+name:"lbl_recapiti",
+size:"145,20",
+text:"Dati recapiti",
+transparent:true,
+typeid:7,
+uuid:"0997D1DF-C6C9-4575-9C1D-9F29D3EDC352"
+},
+{
 dataProviderID:"vChkDimessi",
 displayType:4,
 horizontalAlignment:0,
@@ -25,7 +34,7 @@ typeid:4,
 uuid:"0BC3AF20-7103-4F92-98C8-C242B831AFFB"
 },
 {
-height:230,
+height:214,
 partType:5,
 typeid:19,
 uuid:"11EEA64C-B432-43D6-8515-2905BB59E615"
@@ -340,6 +349,19 @@ text:"Filtra decorrenze",
 transparent:true,
 typeid:7,
 uuid:"B2BA7707-7C1A-4F3C-AC71-E1481F90C517"
+},
+{
+dataProviderID:"vChkDatiRecapiti",
+displayType:4,
+horizontalAlignment:0,
+location:"9,220",
+name:"chkRecapiti",
+onDataChangeMethodID:"37A71830-8C96-49AA-A1AA-F0926F460028",
+size:"20,20",
+styleClass:"check",
+transparent:true,
+typeid:4,
+uuid:"B6448855-610A-444D-A9D9-5B566EDC35F1"
 },
 {
 dataProviderID:"vChkBadge",

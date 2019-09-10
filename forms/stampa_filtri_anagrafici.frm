@@ -36,7 +36,7 @@ onDataChangeMethodID:"3FC7DC3E-5B92-4B2F-AEB4-98093BBE29DA",
 size:"195,20",
 typeid:4,
 uuid:"079EF6F4-46B1-4828-824D-3CECC1286678",
-valuelistID:"41F073DE-E3B1-42CE-AF66-6694E58410F5"
+valuelistID:"D54EDC70-D93F-4FBA-89F0-EE5F8BAB40E5"
 },
 {
 dataProviderID:"vRaggruppamentiDettaglioString",
@@ -337,7 +337,7 @@ uuid:"907B4555-D1CE-4A5E-B614-AA79B3B44039",
 visible:false
 },
 {
-dataProviderID:"vSediLavoroString",
+dataProviderID:"vSedelavoroString",
 displayType:1,
 editable:false,
 enabled:false,
@@ -393,7 +393,7 @@ typeid:4,
 uuid:"A2D2356B-FB80-48DB-8A46-B106339C9C2D"
 },
 {
-dataProviderID:"vPosizioneInpsString",
+dataProviderID:"vPosizioneinpsString",
 displayType:1,
 editable:false,
 enabled:false,

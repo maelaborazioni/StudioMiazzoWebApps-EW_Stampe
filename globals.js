@@ -188,7 +188,7 @@ function selezione_ditta_stampa_annotazioni()
  */
 function selezione_ditta_stampa_situazione_eventi_lunghi()
 {
-	seleziona_ditta_stampa(forms.stampa_situazione_eventi_lunghi.controller.getName(), 'Stampa situazione eventi lunghi', true);
+	seleziona_ditta_stampa(forms.stampa_situazione_eventi_lunghi.controller.getName(), 'Stampa situazione eventi lunghi');
 }
 
 /**
