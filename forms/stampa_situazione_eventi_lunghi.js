@@ -17,11 +17,19 @@ function stampaSituazioneEventiLunghi()
 	var params = forms.stampa_situazione_eventi_lunghi_opzioni.getOptions();
 		params.idditta = idditta;
 		params.iddipendenti = iddipendenti;
-		
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SSEL);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return false;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;	
 	/**
 	 * Launch the operation and close the window
 	 */
-    var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaSituazioneEventiLunghi";
+    var url = globals.WS_REPORT + "/Report32/StampaSituazioneEventiLunghiAsync";
     globals.addJsonWebServiceJob(url, params);
     
     return true;

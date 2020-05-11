@@ -13,65 +13,6 @@ var _arrSelDitteStampa = []
 var _dittaStampa = -1
 
 /**
- * Stampa la scheda interna della ditta
- * 
- * @param {Number} idditta
- *
- * @properties={typeid:24,uuid:"F8C56B8D-75A2-4BB6-93CD-2836BFB26E7E"}
- * @AllowToRunInFind
- */
-function stampa_scheda_interna_ditta(idditta){
-	
-	var url = WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaSchedaInternaDitta";
-	var today = new Date()
-    var periodo = today.getFullYear()*100 + today.getMonth() + 1	
-	var params = {
-		          idditta : idditta,
-		          periodo: periodo, 
-				  tipoconnessione : globals._tipoConnessione
-				  };
-	
-	//globals.addJsonWebServiceJob(url,params);
-    var _response = getWebServiceResponse(url,params)
-	if(_response['returnValue'])
-	{
-		//TODO trovare una maniera scientifica per lanciare l'operazione
-		//solo una volta che la stampa sia effettivamente presente nel database 
-		application.sleep(2000)
-		
-		//recupera la stampa a partire dall'id dell'operazione
-		var _op_id = _response['op_id']
-		
-		/** @type {JSFoundSet<db:/ma_log/operationfile>} */
-		var _fs_op = databaseManager.getFoundSet('ma_log','OperationFile')
-		if(_fs_op.find())
-		{
-			_fs_op.op_id = _op_id
-			_fs_op.search()
-		}
-		if(_fs_op.getSize() == 1)
-		{
-			/** @type {JSFoundSet<db:/ma_log/filelog>} */
-			var _fs_file = databaseManager.getFoundSet('ma_log','FileLog')
-			if(_fs_file.find())
-			{
-				_fs_file.file_id = _fs_op.file_id
-				_fs_file.search()
-			}
-			if(_fs_file.getSize() == 1)
-			{
-				plugins.file.writeFile(_fs_file.file_name,_fs_file.file_bytes,_fs_file.file_type)
-			}else
-				globals.ma_utl_showErrorDialog('File di stampa non recuperato, riprovare','Stampa scheda interna ditta')
-		}
-		else
-			globals.ma_utl_showErrorDialog('Identificativo dell\'operazione non trovato, riprovare','Stampa scheda interna ditta')
-	}
-	else
-	globals.ma_utl_showErrorDialog('Stampa scheda interna non riuscita, riprovare','Stampa scheda interna ditta')
-}
-
-/**
  * @param formName
  * @param formTitle
  * @param [enableGrouping]
@@ -96,11 +37,14 @@ function seleziona_ditte_stampa(formName, formTitle, enableGrouping)
 												
     if(arrDitte && arrDitte.length)
 	{
+		/** @type {JSForm} */
 		var form = forms[formName];
+		/** @type {JSFoundSet} */
+		var fs = form.foundset;
 		if(form.foundset.find())
 		{
-			form.foundset['idditta'] = arrDitte;
-			form.foundset.search();
+			fs['idditta'] = arrDitte;
+			fs.search();
 		}
 		
 		if(forms.stampa_filtri_anagrafici.foundset.find())
@@ -159,16 +103,6 @@ function seleziona_ditta_stampa(formName, formTitle, enableGrouping)
 	}
 	else
 		globals.ma_utl_showWarningDialog('Selezionare almeno una ditta', 'Nessuna ditta selezionata');
-}
-
-/**
- * Mostra la selezione dei parametri per la stampa della situazione ditta
- * 
- * @properties={typeid:24,uuid:"CAD41D19-2C70-4118-8DD3-A80A9C1CDAA9"}
- */
-function selezione_ditta_stampa_situazione_ditta()
-{
-	seleziona_ditta_stampa(forms.stampa_situazione_ditta.controller.getName(), 'Stampa situazione');
 }
 
 /**
@@ -237,7 +171,7 @@ function selezione_ditta_stampa_statistica_fasce(event)
  */
 function selezione_ditta_stampa_situazione_turni(event)
 {
-	seleziona_ditta_stampa(forms.stampa_statistica_turni.controller.getName(), 'Stampa situazione turni', true);
+	seleziona_ditte_stampa(forms.stampa_statistica_turni.controller.getName(), 'Stampa situazione turni', true);
 }
 
 /**
@@ -317,7 +251,17 @@ function selezione_ditta_stampa_esportazione_timbrature(event)
  */
 function stampaGiornalieraDitta(params, callback)
 {
-	var url = WS_REPORT_GIORNALIERA_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaGiornaliera";
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SG);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;
+	
+	var url = WS_REPORT + "/Report32/StampaGiornalieraAsync";
 	addJsonWebServiceJob(url, params, null, null, callback);
 }
 
@@ -331,10 +275,20 @@ function stampaGiornalieraDitta(params, callback)
  */
 function stampaCertificati(params, callback)
 {
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SSEL);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;
+	
 	/**
 	 * Launch the operation and close the window
 	 */
-    var url = WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaSituazioneEventiLunghi";
+    var url = WS_REPORT + "/Report32/StampaSituazioneEventiLunghiAsync";
     globals.addJsonWebServiceJob(url, params, null, null, callback);
 }
 
@@ -455,37 +409,6 @@ function selezione_stampe_amministrazione(event)
 }
 
 /**
- * Funzione generica che recupera i dati necessari alla creazione del
- * dataset per l'esportazione in Excel
- *  
- * @param {Object} params
- * 
- * @return {Array}
- * 
- * @properties={typeid:24,uuid:"0B587228-9036-4278-9AC6-728C962616BB"}
- */
-function recuperaDatiEsportazione(params)
-{
-	var url = WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ?  "/Stampe" : "/Report") + "/RecuperaDatiEsportazione";
-    var _responseObj = getWebServiceResponse(url,params);
-	
-	if(_responseObj != null){
-					   					
-		if(_responseObj['returnValue'] == true){
-					
-			return _responseObj['dipArray'];
-					
-		}else
-			return null;
-			
-	}else				
-		globals.ma_utl_showErrorDialog('Il server non risponde, si prega di riprovare','Errore di comunicazione');
-			
-	return null;
-	
-}
-
-/**
  * @properties={typeid:24,uuid:"89197C27-C5A9-453D-BEAF-E6285731CA6E"}
  */
 function azzeraFiltriAnagrafici()
@@ -499,7 +422,7 @@ function azzeraFiltriAnagrafici()
 	frm.vFilterSedeLavoro = 0;
 	
 	frm.vContrattoString = '';
-	frm.vPosizioneInpsString = '';
+	frm.vPosizioneinpsString = '';
 	frm.vQualificaString = '';
 	frm.vRaggruppamento = null;
 	frm.vRaggruppamentoString = '';
@@ -544,12 +467,13 @@ function abilitaRaggruppamenti(formName,visible)
  * @param {String} [posinps]
  * @param {String} [sedelavoro]
  * @param {String} [raggruppamento]
+ * @param {Number} [classificazione]
  * 
  * @return {JSDataSet}
  * 
  * @properties={typeid:24,uuid:"3171832E-D1B1-4A4B-9D49-77188780E2F2"}
  */
-function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,posinps,sedelavoro,raggruppamento)
+function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,posinps,sedelavoro,raggruppamento,classificazione)
 {
 	// definizione del dataset
 	var colNames = ['periodo','idlavoratore','codiceditta','ragionesociale','codicelavoratore','assunzione','cessazione',
@@ -654,14 +578,15 @@ function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,p
 			if(raggruppamento)
 			{  
 				//raggruppamento == iddittaclassificazione
-				var codClass = globals.getCodiceClassificazione(raggruppamento)
-				var descClass = globals.getDescClassificazione(raggruppamento);
+				var codClass = globals.getCodiceClassificazione(classificazione);
+				var descClass = globals.getDescClassificazione(classificazione);
 				var codDettClass = globals.getCodiceDettaglioClassificazioneLavoratore(arrLavoratori[l],codClass);
-	            var descDettClass = globals.getDescDettaglioClassificazione(raggruppamento,codDettClass); 
-			    arrRiepFasce.push(codClass);
-	            arrRiepFasce.push(descClass);
-	            arrRiepFasce.push(codDettClass);
-	            arrRiepFasce.push(descDettClass);
+	            var descDettClass = globals.getDescDettaglioClassificazione(classificazione,codDettClass); 
+			    
+	            arrRiepFasce.push(codClass);
+		        arrRiepFasce.push(descClass);
+		        arrRiepFasce.push(codDettClass);
+		        arrRiepFasce.push(descDettClass);	            
 			}
 			else
 			{
@@ -685,68 +610,13 @@ function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,p
 					else
 						arrRiepFasce.push('');
 				}
-			}
+			}		
 			
 			ds.addRow(arrRiepFasce);
-			
 		}
 	}
 		
 	return ds;
-	
-//	var sqlRiepilogoFasce = "SELECT \
-//	YEAR(CAL.Giorno) * 100 + MONTH(CAL.Giorno) AS Periodo \
-//	,CAL.Giorno AS Data \
-//	,D.Codice AS CodiceDitta \
-//	,D.RagioneSociale \
-//	,L.idLavoratore \
-//	,L.Codice AS CodiceLavoratore \
-//	,L.Assunzione \
-//	,L.Cessazione \
-//	,CASE WHEN P.Nominativo IS NOT NULL \
-//	 THEN P.Nominativo \
-//	 ELSE (CASE WHEN LPE.Nominativo IS NOT NULL THEN LPE.Nominativo ELSE '' END) \
-//	 END AS Nominativo \
-//	,CASE \
-//	 WHEN G.idFasciaOrariaForzata IS NOT NULL \
-//	 THEN G.idFasciaOrariaForzata \
-//	 ELSE (CASE WHEN GPF.idFasciaOraria IS NOT NULL THEN GpF.idFasciaOraria ELSE dbo.F_Lav_IDFasciaTeorica(L.idLavoratore,CAL.Giorno) END) \
-//	 END AS Fascia \
-//	,FO.CodiceFascia \
-//	,FO.Descrizione \
-//	,CASE WHEN FO.CodAlternativo IS NOT NULL \
-//	 THEN FO.CodAlternativo \
-//	 ELSE '' \
-//	 END AS Turno \
-//	FROM \
-//	Lavoratori L \
-//	INNER JOIN Ditte D \
-//	ON L.idDitta = D.idDitta \
-//	LEFT JOIN dbo.UF_ElencoGiorniPeriodo(?,?}) CAL \
-//	ON CAL.Giorno > L.Assunzione \
-//	LEFT OUTER JOIN E2Giornaliera G \
-//	ON G.Giorno = CAL.Giorno AND G.idDip = L.idLavoratore \
-//	LEFT OUTER JOIN E2GiornalieraProgFasce GPF \
-//	ON GPF.Giorno = CAL.Giorno AND GPF.idDip = L.idLavoratore \
-//	LEFT JOIN E2FO_FasceOrarie FO \
-//	ON FO.idFasciaOraria = (CASE \
-//	 WHEN G.idFasciaOrariaForzata IS NOT NULL \
-//	 THEN G.idFasciaOrariaForzata \
-//	 ELSE (CASE WHEN GPF.idFasciaOraria IS NOT NULL THEN GpF.idFasciaOraria ELSE dbo.F_Lav_IDFasciaTeorica(L.idLavoratore,CAL.Giorno) END) \
-//	 END) \
-//	LEFT OUTER JOIN Persone P \
-//	ON L.CodiceFiscale = P.CodiceFiscale \
-//	LEFT OUTER JOIN Lavoratori_PersoneEsterne LPE \
-//	ON L.idLavoratore = LPE.idLavoratore \
-//	WHERE CAL.Giorno BETWEEN ? AND ? \
-//	AND L.idLavoratore IN (" + arrLavoratori.map(function(l){return l}).join(',') + ") \
-//	AND L.Assunzione < ? AND (Cessazione IS NULL OR Cessazione > ?) \
-//	ORDER BY Nominativo,CAL.Giorno"; 
-//	
-//	var arrRiepilogoFasce = [dal,al,dal,al,al,dal];
-//	var dsRiepilogoFasce = databaseManager.getDataSetByQuery(globals.Server.MA_PRESENZE,sqlRiepilogoFasce,arrRiepilogoFasce,-1);
-//
-//	return dsRiepilogoFasce;
 }
 
 /**
@@ -771,7 +641,8 @@ function exportReportRiepilogoTurniDip(params)
 							  pqualifica : params['groupqualifica'],
 							  pposinps   : params['groupposizioneinps'],
 							  psedelavoro : params['groupsedelavoro'],
-							  pclassificazione : params['groupclassificazione']
+							  pclassificazione : params['groupclassificazione'],
+							  pdettclassificazione : params['']
 						  };
 		
 		/**
@@ -822,7 +693,7 @@ function exportReportRiepilogoTurni(params)
 						 op_progress : 25,
 						 op_periodo : params.dalladata.getFullYear() * 100 + params.dalladata.getMonth() + 1,
 						 op_message : 'Recupero dei dati in corso...' };
-		var operation = scopes.log.GetNewOperation(globals.OpType.SST,op_values);
+		var operation = scopes.operation.getNewOperation(globals.OpType.SST,op_values);
 		if(!operation)
 			throw new Error('createReport: Cannot create operation');		
 				
@@ -832,7 +703,8 @@ function exportReportRiepilogoTurni(params)
 		
 		// ottenimento del dataset
 		var ds = globals.ottieniDatasetRiepilogoFasce(params.iddipendenti,params.dalladata,params.alladata,
-			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,params.groupclassificazione);
+			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,
+													  params.groupraggruppamento,params.groupclassificazione);
 		
 		operation.op_message = 'Generazione del report in corso...';
 		operation.op_progress = 75;
@@ -892,7 +764,8 @@ function exportReportRiepilogoTurni(params)
 /**
  * Creazione del file excel con il riepilogo dei turni
  * 
- * @param params
+ * @param {{idditta : Number, iddipendenti : Array<Number>, dalladata : Date, alladata : Date, groupcontratto : String, groupqualifica : String, groupposizioneinps : String,
+ *         groupsedelavoro : String,  groupraggruppamento : String, groupclassificazione : Number}} params
  * 
  * @properties={typeid:24,uuid:"6CF25DBC-E652-4594-B291-11A762953676"}
  */
@@ -904,11 +777,11 @@ function exportExcelRiepilogoTurni(params)
 						 op_progress : 25,
 						 op_periodo : params.dalladata.getFullYear() * 100 + params.dalladata.getMonth() + 1,
 						 op_message : 'Recupero dei dati in corso...' };
-		var operation = scopes.log.GetNewOperation(globals.OpType.SST,op_values);
+		var operation = scopes.operation.getNewOperation(globals.OpType.SST,op_values);
 		if(!operation)
 			throw new Error('createReport: Cannot create operation');		
 		
-		var fileName = 'Riepilogo_Programmazione_Fasce_Dal_' + globals.dateFormat(params.dal,globals.ISO_DATEFORMAT) + '_Al_' + globals.dateFormat(params.al,globals.ISO_DATEFORMAT);
+		var fileName = 'Riepilogo_Programmazione_Fasce_Dal_' + globals.dateFormat(params.dalladata,globals.ISO_DATEFORMAT) + '_Al_' + globals.dateFormat(params.alladata,globals.ISO_DATEFORMAT);
 		
 		/** @type {Array<byte>} */
 		var template = plugins.file.readFile('C:/Report/PT_RiepilogoProgrammazione.xls');
@@ -918,10 +791,12 @@ function exportExcelRiepilogoTurni(params)
 		//  apertura form storico senza necessariamente aprire il program relativo (molto più snello)	
 		globals.ma_utl_showFormInDialog(frm.controller.getName(), 'Avanzamento stato operazione');		
 		
+		params.iddipendenti = scopes.lavoratori.sortByNominativo(params.iddipendenti);
+		
 		// ottenimento del dataset
 		var ds = globals.ottieniDatasetRiepilogoFasce(params.iddipendenti,params.dalladata,params.alladata,
-			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,params.groupclassificazione);
-		// TODO ordinamento ???
+													  params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,
+													  params.groupraggruppamento,params.groupclassificazione);
 		
 		// definizione delle colonne e dei tipi del dataset
 		var colTypes = [JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.TEXT,JSColumn.NUMBER,JSColumn.DATETIME,JSColumn.DATETIME,JSColumn.TEXT,
@@ -992,8 +867,20 @@ function exportExcelRiepilogoTurni(params)
 		 */
 		plugins.file.deleteFolder(globals.SERVER_TMPDIR.replace(/\\/g,'/') + '/export/', false);
 		databaseManager.commitTransaction();
-		
-		var retObj = {status : operation};
+		/** @type {{statusCode:Number, returnValue:Object, message:String, operationId:String, 
+                    operationHash:String, status:Number, start:Date, end:Date, progress:Number, lastProgress:Date}} */
+		var retObj = {
+			statusCode : HTTPStatusCode.OK,
+			returnValue : true,
+			message : operation.op_message,
+			operationId : operation.op_id,
+			operationHash : operation.op_hash,
+			status : operation.op_status,
+			start : operation.op_start,
+			end : operation.op_end,
+			progress : operation.op_progress,
+			lastProgress : operation.op_lastprogress
+		};
 		forms.mao_history.checkStatusCallback(retObj);
 		forms.mao_history.operationDone(retObj);
 	}
@@ -1006,7 +893,7 @@ function exportExcelRiepilogoTurni(params)
  */
 function stampaGiornalieraDittaSync(params)
 {
-	var url = WS_REPORT_GIORNALIERA_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaGiornalieraSync";
+	var url = WS_REPORT + "/Report32/StampaGiornalieraSync";
 	return getWebServiceResponse(url, params);
 }
 
@@ -1017,6 +904,6 @@ function stampaGiornalieraDittaSync(params)
  */
 function stampaCertificatiSync(params)
 {
-	var url = WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaSituazioneEventiLunghiSync";
+	var url = WS_REPORT + "/Report32/StampaSituazioneEventiLunghiSync";
     return globals.getWebServiceResponse(url, params);
 }

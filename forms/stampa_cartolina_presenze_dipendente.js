@@ -84,10 +84,20 @@ function process_conferma_stampa_cartolina_dipendente(event)
 		params['groupRaggruppamento'] = 0;
 		params['groupTipoRaggruppamento'] = 0;
 		
+		// add new operation info for future updates
+		var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SCP);
+		if(operation == null || operation.operationId == null)
+		{
+			globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+			return;
+		}
+		params.operationid = operation.operationId;
+		params.operationhash = operation.operationHash;
+		
 		globals.ma_utl_setStatus(globals.Status.BROWSE,controller.getName());
 		globals.svy_mod_closeForm(event);
 		
-		var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaCartolinaPresenze";
+		var url = globals.WS_REPORT + "/Report32/StampaCartolinaPresenzeAsync";
 		globals.addJsonWebServiceJob(url, params);
 	}
 	catch(ex)

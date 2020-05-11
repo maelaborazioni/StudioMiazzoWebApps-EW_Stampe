@@ -36,7 +36,6 @@ function stampaSituazioneRatei(event)
 	
 	var params = forms.stampa_situazione_ratei_opzioni.getOptions();
 		params['idditta'] = idditta;
-		params['iddipendenti'] = scopes.lavoratori.sortByNominativo(iddipendenti,foundset.tipologia);
 		params['bexcel'] = vFormat;
 		params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
 		params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
@@ -45,7 +44,19 @@ function stampaSituazioneRatei(event)
 		params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
 		params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
 	
-	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaSituazioneRatei";
+		params['iddipendenti'] = params['groupraggruppamento'] ? scopes.lavoratori.sortByRaggruppamentoDettaglio(iddipendenti) : scopes.lavoratori.sortByNominativo(iddipendenti);
+	
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SSR);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return false;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;
+		
+	var url = globals.WS_REPORT + "/Report32/StampaSituazioneRatei";
 	globals.addJsonWebServiceJob(url, params);
 	  
 	return true;

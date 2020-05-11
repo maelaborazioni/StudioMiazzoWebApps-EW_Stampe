@@ -24,14 +24,18 @@ function stampaStatisticaFasce(event) {
 	params['idditta'] = idditta;
 	params['iddipendenti'] = iddipendenti;
 	params['bexcel'] = vFormat;
-//	params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
-//	params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
-//	params['groupposizioneinps'] = forms.stampa_filtri_anagrafici.vGroupPosizioneinps;
-//	params['groupsedelavoro'] = forms.stampa_filtri_anagrafici.vGroupSedelavoro;
-//	params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
-//	params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
+
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SSF);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return false;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;
 	
-	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaStatisticaFasce";
+	var url = globals.WS_REPORT + "/Report32/StampaStatisticaFasceAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

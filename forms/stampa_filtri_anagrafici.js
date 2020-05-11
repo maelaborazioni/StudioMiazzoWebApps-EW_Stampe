@@ -651,14 +651,16 @@ function filterLavoratori(_fs,stampaDaGiornaliera)
 	if(fs.find())
 	{
 		fs.idditta = globals.foundsetToArray(foundset,'idditta');//idditta;
-		
-//		if(stampaDaGiornaliera)
-//		   fs.addFoundSetFilterParam('idlavoratore','IN',globals.foundsetToArray(forms.giorn_header.foundset,'idlavoratore'));
-			
-		if(frmStampaFiltriAnag.vFilterRaggruppamento)
+
+		// Ticket 17098
+//		if(frmStampaFiltriAnag.vFilterRaggruppamento)
+//			fs.lavoratori_to_lavoratori_classificazioni.codtipoclassificazione = vRaggruppamentoCodice;
+		if(frmStampaFiltriAnag.vFilterRaggruppamento && 
+				frmStampaFiltriAnag.vRaggruppamentiDettaglio)
+		{
 			fs.lavoratori_to_lavoratori_classificazioni.codtipoclassificazione = vRaggruppamentoCodice;
-		if(frmStampaFiltriAnag.vRaggruppamentiDettaglio)
 			fs.lavoratori_to_lavoratori_classificazioni.codclassificazione = vRaggruppamentiDettaglio;
+		}
 		if(frmStampaFiltriAnag.vFilterContratto)
 			fs.codcontratto = vContratto;
 		if(frmStampaFiltriAnag.vFilterQualifica)
@@ -686,7 +688,6 @@ function filterLavoratori(_fs,stampaDaGiornaliera)
 			
 	        var arrLavGruppo = globals.getLavoratoriGruppo(params,params.idditta);
 	        fs.addFoundSetFilterParam('idlavoratore',globals.ComparisonOperator.IN,arrLavGruppo);
-	        
 		}
 		
 		fs.search(); 
@@ -701,6 +702,8 @@ function filterLavoratori(_fs,stampaDaGiornaliera)
  * @param {Date} from
  * @param {Date} to
  * 
+ * @return {JSFoundSet<db:/ma_anagrafiche/lavoratori>}
+ * 
  * @AllowToRunInFind
  *
  * @properties={typeid:24,uuid:"9AA23A38-632E-48FA-B66C-855D675FA735"}
@@ -712,7 +715,7 @@ function getLavoratori(from,to)
 	var frmStampaFiltriAnag = forms.stampa_filtri_anagrafici;
 	if(fs.find())
 	{
-		fs.idditta = globals.foundsetToArray(foundset,'idditta');//idditta;
+		fs.idditta = globals.foundsetToArray(foundset,'idditta');
 		
 		fs.assunzione = '<=' + globals.dateFormat(to,globals.ISO_DATEFORMAT) + '|yyyyMMdd';
 		fs.cessazione = '^||>=' + globals.dateFormat(from,globals.ISO_DATEFORMAT) + '|yyyyMMdd'

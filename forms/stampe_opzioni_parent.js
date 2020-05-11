@@ -4,8 +4,9 @@
 function getOptions()
 {
 	return { 
-		user_id                 : security.getUserName(), 
-		client_id               : security.getClientID(),
-		tipoconnessione         : globals.getTipoConnessione()
+		userid                  : security.getUserName(), 
+		clientid                : security.getClientID(),
+		server                  : globals.server_db_name,
+		databasecliente         : globals.customer_dbserver_name
 		};
 }

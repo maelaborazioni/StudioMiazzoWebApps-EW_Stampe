@@ -18,7 +18,8 @@ size:"145,20",
 text:"Dati recapiti",
 transparent:true,
 typeid:7,
-uuid:"0997D1DF-C6C9-4575-9C1D-9F29D3EDC352"
+uuid:"0997D1DF-C6C9-4575-9C1D-9F29D3EDC352",
+visible:false
 },
 {
 dataProviderID:"vChkDimessi",
@@ -294,7 +295,8 @@ size:"20,20",
 styleClass:"check",
 transparent:true,
 typeid:4,
-uuid:"A1573785-C88C-4CED-996D-3B0FF0FBCBBF"
+uuid:"A1573785-C88C-4CED-996D-3B0FF0FBCBBF",
+visible:false
 },
 {
 location:"10,10",
@@ -361,7 +363,8 @@ size:"20,20",
 styleClass:"check",
 transparent:true,
 typeid:4,
-uuid:"B6448855-610A-444D-A9D9-5B566EDC35F1"
+uuid:"B6448855-610A-444D-A9D9-5B566EDC35F1",
+visible:false
 },
 {
 dataProviderID:"vChkBadge",
@@ -375,7 +378,8 @@ size:"20,20",
 styleClass:"check",
 transparent:true,
 typeid:4,
-uuid:"B844A0E1-4041-44F4-93EC-E17DBBBC89F8"
+uuid:"B844A0E1-4041-44F4-93EC-E17DBBBC89F8",
+visible:false
 },
 {
 dataProviderID:"vChkInForzaAl",
@@ -397,7 +401,8 @@ size:"68,20",
 text:"Solo regole",
 transparent:true,
 typeid:7,
-uuid:"CE9714DF-C632-48FD-9A6A-AFA146598109"
+uuid:"CE9714DF-C632-48FD-9A6A-AFA146598109",
+visible:false
 },
 {
 dataProviderID:"vChkDecorrenzeAl",
@@ -468,7 +473,8 @@ size:"65,20",
 text:"Solo badge",
 transparent:true,
 typeid:7,
-uuid:"F0C4B656-D919-47E0-B754-7F4D8C025868"
+uuid:"F0C4B656-D919-47E0-B754-7F4D8C025868",
+visible:false
 },
 {
 location:"30,100",

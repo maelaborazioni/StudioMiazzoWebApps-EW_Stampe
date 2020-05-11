@@ -31,7 +31,9 @@ function stampaPresentiAssenti()
 	
 	if(!params.almomento)
 	{
-		var dataUltimaAcquisizione = globals.getDataUltimoScarico(globals.getDitte());
+		/** @type {Array<Number>}*/
+		var arrDitte = globals.getDitte();
+		var dataUltimaAcquisizione = globals.getDataUltimoScarico(arrDitte);
 		var msg = 'L\'ultima acquisizione delle timbrature é avvenuta il giorno ' + globals.dateFormat(dataUltimaAcquisizione,globals.EU_DATEFORMAT) + 
 		          ' alle ore ' + globals.dateFormat(dataUltimaAcquisizione,globals.OREMINUTI_DATEFORMAT) + '.<br/>' +
 				  'Si desidera proseguire con il report?';
@@ -39,19 +41,29 @@ function stampaPresentiAssenti()
         if(!answer)
         	return answer;
 	}
-		
+	params['idditta'] = -1;	
 	params['idgruppoinstallazione'] = -1;
-	    params['iddipendenti'] = [];
-	    params['bexcel'] = vFormat;
-	    params['periodo'] = globals.toPeriodo(globals.TODAY.getFullYear(),globals.TODAY.getMonth()+1);
-	    params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
-		params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
-		params['groupposizioneinps'] = forms.stampa_filtri_anagrafici.vGroupPosizioneinps;
-		params['groupsedelavoro'] = forms.stampa_filtri_anagrafici.vGroupSedelavoro;
-		params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
-		params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
-		
-	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaPresentiAssenti";
+    params['iddipendenti'] = [];
+    params['bexcel'] = vFormat;
+    params['periodo'] = globals.toPeriodo(globals.TODAY.getFullYear(),globals.TODAY.getMonth()+1);
+    params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
+	params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
+	params['groupposizioneinps'] = forms.stampa_filtri_anagrafici.vGroupPosizioneinps;
+	params['groupsedelavoro'] = forms.stampa_filtri_anagrafici.vGroupSedelavoro;
+	params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
+	params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
+
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SPA);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return false;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;
+	
+	var url = globals.WS_REPORT + "/Report32/StampaPresentiAssentiAsync";
 	globals.addJsonWebServiceJob(url,params);
 	
 	return true;

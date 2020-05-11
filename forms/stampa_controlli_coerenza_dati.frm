@@ -19,7 +19,7 @@ uuid:"4195768B-1CF3-4D1B-A090-E905FD9EE285"
 location:"330,228",
 mediaOptions:10,
 name:"btn_conferma_controlli",
-onActionMethodID:"7C578651-AAE4-44C9-9845-E0618DF4BBD4",
+onActionMethodID:"-1",
 showClick:false,
 showFocus:false,
 size:"30,30",

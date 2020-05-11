@@ -273,8 +273,6 @@ function onDataChangeCodEvento(oldValue, newValue, event)
 }
 
 /**
- * @return {{ tipoconnessione: Number, ideventoclasse: Number, tipostampa: Number, inforzaal: String, periodo: Number, compresidal: String, compresial: String }}
- * 
  * @properties={typeid:24,uuid:"22495B3B-026C-4C7D-B091-2F495EC95751"}
  */
 function getOptions()

@@ -211,9 +211,7 @@ function exportReport(event)
 			 null,
 			 globals.OpType.EWEA,
 			 values
-		);
-		
-		
+		);	
 	}
 	catch(ex)
 	{
@@ -283,6 +281,15 @@ function createExcelFile(dittaID, dateTo, operation)
 		 */
 		var vDateTo = globals.TODAY;
 		
+		// verifica tipologia ditta
+		var isInterinale = globals.isInterinale(idditta);
+		
+		// form opzioni anagrafica
+		var frmAnag = forms.stampa_filtri_anagrafici;
+		
+		// verifica tipologia raggruppamento
+		var isClassificazioneManuale = globals.isClassificazioneManuale(idditta,frmAnag.vRaggruppamentoCodice);
+		
 		// LOG per inizio recupero dati
 		operation.op_message = 'Inizio estrazione dati';
 		operation.op_end = new Date();
@@ -293,9 +300,6 @@ function createExcelFile(dittaID, dateTo, operation)
 		var localFile = true;
 		/** @type {Array<byte>} */
 		var template = plugins.file.readFile('C:/Report/EW_ElencoAnagrafiche.xls');
-		
-		// form opzioni anagrafica
-		var frmAnag = forms.stampa_filtri_anagrafici;
 		
 		// form opzioni di stampa
 		var frmOpt = forms.stampa_anagrafica_dipendenti_opzioni;
@@ -373,7 +377,7 @@ function createExcelFile(dittaID, dateTo, operation)
            template = plugins.file.readFile('C:/Report/EW_ElencoAnagraficheDecorrenze.xls');	
            strSQL = strSQL + " , LavDec.Decorrenza AS DataDecorrenza, LavDec.idDCG_Campi AS CodTipoDecorrenza, Campi.DescrizioneCampo AS TipoDecorrenza"
            colNames.push('datadecorrenza');
-           colTypes.push(JSColumn.TEXT);
+           colTypes.push(JSColumn.DATETIME);
            colNames.push('codtipodecorrenza');
            colTypes.push(JSColumn.TEXT);
            colNames.push('tipodecorrenza');
@@ -444,17 +448,21 @@ function createExcelFile(dittaID, dateTo, operation)
 								   , DCD.Descrizione AS DescDettaglio \
 								   , DCD.idDittaClassificazioneDettaglio \
 								FROM \
-									Lavoratori_Classificazioni LC \
-                                    INNER JOIN Ditte_ClassificazioniDettaglio DCD ON DCD.Codice = LC.CodClassificazione \
-                                    INNER JOIN Ditte_Classificazioni DC ON DCD.idDittaClassificazione = DC.idDittaClassificazione AND DC.idDitta = LC.idDitta \
-									WHERE LC.idDitta = " + idditta + " \
-									AND LC.CodTipoClassificazione = " + frmAnag.vRaggruppamentoCodice + " AND LC.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
-									AND DC.Codice = " + frmAnag.vRaggruppamentoCodice + " \
-									AND DCD.Codice IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
-								 ) AS CL ON CL.idLavoratore = L.idLavoratore ";
+									Lavoratori_Classificazioni LC ";
         	
-//        	strSQL = strSQL + " LEFT OUTER JOIN Lavoratori_Classificazioni LR ON LR.idLavoratore = L.idLavoratore";
-//           	strSQL = strSQL + " LEFT OUTER JOIN Ditte_ClassificazioniDettaglio DCD ON LR.CodClassificazione = DCD.Codice";
+        	if(isInterinale && !isClassificazioneManuale)
+        		strSQL += " LEFT OUTER JOIN Ditte_Legami DL ON LC.idDitta = DL.idDitta "; 
+        	
+        	strSQL += " INNER JOIN Ditte_ClassificazioniDettaglio DCD ON DCD.Codice = LC.CodClassificazione \
+                        INNER JOIN Ditte_Classificazioni DC ON DCD.idDittaClassificazione = DC.idDittaClassificazione " 
+        	
+        	isInterinale && !isClassificazioneManuale ? strSQL += " AND DC.idDitta = DL.idDittaRiferimento " : strSQL += " AND DC.idDitta = LC.idDitta"; 
+								
+			strSQL += " WHERE LC.idDitta = " + idditta + " \
+					    AND LC.CodTipoClassificazione = " + frmAnag.vRaggruppamentoCodice + " AND LC.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+						AND DC.Codice = " + frmAnag.vRaggruppamentoCodice + " \
+						AND DCD.Codice IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+						) AS CL ON CL.idLavoratore = L.idLavoratore ";
         }
         strSQL = strSQL + " LEFT OUTER JOIN Ditte_Sedi DS ON L.idDittaSede = DS.idDittaSede"
 		strSQL = strSQL + " WHERE D.idDitta = ?"
@@ -626,6 +634,15 @@ function createReport(dittaID, dateTo, operation)
 		 */
 		var vDateTo = globals.TODAY;
 		
+		// verifica tipologia ditta
+		var isInterinale = globals.isInterinale(idditta);
+		
+		// form opzioni anagrafica
+		var frmAnag = forms.stampa_filtri_anagrafici;
+		
+		// verifica tipologia raggruppamento
+		var isClassificazioneManuale = globals.isClassificazioneManuale(idditta,frmAnag.vRaggruppamentoCodice);
+		
 		// LOG per inizio recupero dati
 //		operation.op_message = 'Inizio estrazione dati';
 //		operation.op_end = new Date();
@@ -636,10 +653,7 @@ function createReport(dittaID, dateTo, operation)
 		
 		// parametro relativo ad impostazione titolo del report
 		var pTitolo = '';
-		
-		// form opzioni anagrafica
-		var frmAnag = forms.stampa_filtri_anagrafici;
-		
+				
 		// form opzioni di stampa
 		var frmOpt = forms.stampa_anagrafica_dipendenti_opzioni;
 		var dal,al = null;
@@ -728,25 +742,33 @@ function createReport(dittaID, dateTo, operation)
         if(frmAnag.vFilterRaggruppamento)
         {
         	strSQL = strSQL + " INNER JOIN \
-								 (\
-									SELECT \
-								   LC.idLavoratoreClassificazione \
-								   , LC.idLavoratore \
-								   , LC.idDitta \
-								   , DC.Codice \
-								   , DC.Descrizione \
-								   , DC.DescrizioneSostitutiva \
-								   , DCD.Codice AS CodDettaglio \
-								   , DCD.Descrizione AS DescDettaglio \
-								FROM \
-									Lavoratori_Classificazioni LC \
-                                    INNER JOIN Ditte_ClassificazioniDettaglio DCD ON DCD.Codice = LC.CodClassificazione \
-                                    INNER JOIN Ditte_Classificazioni DC ON DCD.idDittaClassificazione = DC.idDittaClassificazione AND DC.idDitta = LC.idDitta \
-									WHERE LC.idDitta = " + idditta + " \
-									AND LC.CodTipoClassificazione = " + frmAnag.vRaggruppamentoCodice + " AND LC.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
-									AND DC.Codice = " + frmAnag.vRaggruppamentoCodice + " \
-									AND DCD.Codice IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
-								 ) AS CL ON CL.idLavoratore = L.idLavoratore ";
+			 (\
+				SELECT \
+			   LC.idLavoratoreClassificazione \
+			   , LC.idLavoratore \
+			   , LC.idDitta \
+			   , DC.Codice \
+			   , DC.Descrizione \
+			   , DC.DescrizioneSostitutiva \
+			   , DCD.Codice AS CodDettaglio \
+			   , DCD.Descrizione AS DescDettaglio \
+			   , DCD.idDittaClassificazioneDettaglio \
+			FROM \
+				Lavoratori_Classificazioni LC ";
+
+			if(isInterinale && !isClassificazioneManuale)
+			strSQL += " LEFT OUTER JOIN Ditte_Legami DL ON LC.idDitta = DL.idDitta "; 
+			
+			strSQL += " INNER JOIN Ditte_ClassificazioniDettaglio DCD ON DCD.Codice = LC.CodClassificazione \
+			   INNER JOIN Ditte_Classificazioni DC ON DCD.idDittaClassificazione = DC.idDittaClassificazione " 
+			
+			isInterinale && !isClassificazioneManuale ? strSQL += " AND DC.idDitta = DL.idDittaRiferimento " : strSQL += " AND DC.idDitta = LC.idDitta"; 
+						
+			strSQL += " WHERE LC.idDitta = " + idditta + " \
+			   AND LC.CodTipoClassificazione = " + frmAnag.vRaggruppamentoCodice + " AND LC.CodClassificazione IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+				AND DC.Codice = " + frmAnag.vRaggruppamentoCodice + " \
+				AND DCD.Codice IN (" + frmAnag.vRaggruppamentiDettaglio.join(',') + ") \
+				) AS CL ON CL.idLavoratore = L.idLavoratore ";
       	
         }
         strSQL = strSQL + " LEFT OUTER JOIN Ditte_Sedi DS ON L.idDittaSede = DS.idDittaSede"

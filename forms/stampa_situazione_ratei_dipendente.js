@@ -45,6 +45,10 @@ function stampaSituazioneRateiDipendente(event)
 		return false;	
 	
 	var params = new Object();
+	    params['userid'] = security.getUserName();
+	    params['clientid'] = security.getClientID();
+	    params['server'] = globals.server_db_name;
+	    params['databasecliente'] = globals.customer_db_name;
 	    params['alladata']	= utils.dateFormat(vAllaData,globals.EU_DATEFORMAT);
 	    params['daticontrattuali']= 1;
 	    params['codicirateoselezionati'] = vArrayCodiciRateo;
@@ -58,8 +62,18 @@ function stampaSituazioneRateiDipendente(event)
 		params['groupSedeLavoro'] = 0;
 		params['groupRaggruppamento'] = 0;
 		params['groupTipoRaggruppamento'] = 0;
-		
-	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaSituazioneRatei";
+	
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.CE);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return false;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;
+	
+	var url = globals.WS_REPORT + "/Report32/StampaSituazioneRateiAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

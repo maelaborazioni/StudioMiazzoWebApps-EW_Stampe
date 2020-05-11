@@ -31,7 +31,16 @@ function stampaStatisticaEventi(event) {
 	params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
 	params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
 	
-	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaStatisticaEventi";
+	// add new operation info for future updates
+	var operation = scopes.operation.create(params['idditta'],globals.getGruppoInstallazioneDitta(params['idditta']),params['periodo'],globals.OpType.SSE);
+	if(operation == null || operation.operationId == null)
+	{
+		globals.ma_utl_showErrorDialog('Errore durante la preparazione dell\'operazione lunga. Riprovare o contattare il  servizio di Assistenza.');
+		return false;
+	}
+	params.operationid = operation.operationId;
+	params.operationhash = operation.operationHash;
+	var url = globals.WS_REPORT + "/Report32/StampaStatisticaEventiAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

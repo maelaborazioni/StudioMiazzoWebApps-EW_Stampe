@@ -133,37 +133,37 @@ function onDataChangeChkSceltaControlli(oldValue, newValue, event) {
 	return true;
 }
 
-/**
- * Perform the element default action.
- *
- * @param {JSEvent} event the event that triggered the action
- *
- * @private
- *
- * @properties={typeid:24,uuid:"7C578651-AAE4-44C9-9845-E0618DF4BBD4"}
- */
-function stampaControlliCoerenzaDati(event) {
-	
-	if (_idTipologiaControlli != null && _arrElencoCampi.length > 0) {
-		
-		var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaControlliCoerenzaDati";
-		var now = new Date();
-		var params = {
-			idditta: _idditta,
-			ditte: _arrDitteSel,
-			iddipendenti: [],
-			idtipologiacontrolli: _idTipologiaControlli,
-			elencocampi: _arrElencoCampi,
-			tipogiornaliera: "N",
-			tipoconnessione: globals._tipoConnessione,
-			periodo: now.getFullYear() * 100 + now.getMonth() + 1
-
-		};
-		
-		globals.svy_nav_dc_setStatus('browse', 'stampa_controlli_coerenza_dati', true);
-        globals.svy_mod_closeForm(event);
-		globals.addJsonWebServiceJob(url, params);
-	}
-	else
-		globals.ma_utl_showWarningDialog('Selezionare una tipologia ed almeno un controllo','Stampa controlli coerenza dati');
-}
+///**
+// * Perform the element default action.
+// *
+// * @param {JSEvent} event the event that triggered the action
+// *
+// * @private
+// *
+// * @properties={typeid:24,uuid:"7C578651-AAE4-44C9-9845-E0618DF4BBD4"}
+// */
+//function stampaControlliCoerenzaDati(event) {
+//	
+//	if (_idTipologiaControlli != null && _arrElencoCampi.length > 0) {
+//		
+//		var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaControlliCoerenzaDati";
+//		var now = new Date();
+//		var params = {
+//			idditta: _idditta,
+//			ditte: _arrDitteSel,
+//			iddipendenti: [],
+//			idtipologiacontrolli: _idTipologiaControlli,
+//			elencocampi: _arrElencoCampi,
+//			tipogiornaliera: "N",
+//			tipoconnessione: globals._tipoConnessione,
+//			periodo: now.getFullYear() * 100 + now.getMonth() + 1
+//
+//		};
+//		
+//		globals.svy_nav_dc_setStatus('browse', 'stampa_controlli_coerenza_dati', true);
+//        globals.svy_mod_closeForm(event);
+//		globals.addJsonWebServiceJob(url, params);
+//	}
+//	else
+//		globals.ma_utl_showWarningDialog('Selezionare una tipologia ed almeno un controllo','Stampa controlli coerenza dati');
+//}
