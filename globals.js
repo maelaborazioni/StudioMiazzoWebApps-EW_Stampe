@@ -237,7 +237,7 @@ function selezione_ditta_stampa_statistica_fasce(event)
  */
 function selezione_ditta_stampa_situazione_turni(event)
 {
-	seleziona_ditta_stampa(forms.stampa_statistica_turni.controller.getName(), 'Stampa situazione turni', true);
+	seleziona_ditte_stampa(forms.stampa_statistica_turni.controller.getName(), 'Stampa situazione turni', true);
 }
 
 /**
@@ -544,12 +544,13 @@ function abilitaRaggruppamenti(formName,visible)
  * @param {String} [posinps]
  * @param {String} [sedelavoro]
  * @param {String} [raggruppamento]
+ * @param {String} [classificazione]
  * 
  * @return {JSDataSet}
  * 
  * @properties={typeid:24,uuid:"3171832E-D1B1-4A4B-9D49-77188780E2F2"}
  */
-function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,posinps,sedelavoro,raggruppamento)
+function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,posinps,sedelavoro,raggruppamento,classificazione)
 {
 	// definizione del dataset
 	var colNames = ['periodo','idlavoratore','codiceditta','ragionesociale','codicelavoratore','assunzione','cessazione',
@@ -654,14 +655,15 @@ function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,p
 			if(raggruppamento)
 			{  
 				//raggruppamento == iddittaclassificazione
-				var codClass = globals.getCodiceClassificazione(raggruppamento)
-				var descClass = globals.getDescClassificazione(raggruppamento);
+				var codClass = globals.getCodiceClassificazione(classificazione);
+				var descClass = globals.getDescClassificazione(classificazione);
 				var codDettClass = globals.getCodiceDettaglioClassificazioneLavoratore(arrLavoratori[l],codClass);
-	            var descDettClass = globals.getDescDettaglioClassificazione(raggruppamento,codDettClass); 
-			    arrRiepFasce.push(codClass);
-	            arrRiepFasce.push(descClass);
-	            arrRiepFasce.push(codDettClass);
-	            arrRiepFasce.push(descDettClass);
+	            var descDettClass = globals.getDescDettaglioClassificazione(classificazione,codDettClass); 
+			    
+	            arrRiepFasce.push(codClass);
+		        arrRiepFasce.push(descClass);
+		        arrRiepFasce.push(codDettClass);
+		        arrRiepFasce.push(descDettClass);	            
 			}
 			else
 			{
@@ -685,68 +687,13 @@ function ottieniDatasetRiepilogoFasce(arrLavoratori,dal,al,contratto,qualifica,p
 					else
 						arrRiepFasce.push('');
 				}
-			}
+			}		
 			
 			ds.addRow(arrRiepFasce);
-			
 		}
 	}
 		
 	return ds;
-	
-//	var sqlRiepilogoFasce = "SELECT \
-//	YEAR(CAL.Giorno) * 100 + MONTH(CAL.Giorno) AS Periodo \
-//	,CAL.Giorno AS Data \
-//	,D.Codice AS CodiceDitta \
-//	,D.RagioneSociale \
-//	,L.idLavoratore \
-//	,L.Codice AS CodiceLavoratore \
-//	,L.Assunzione \
-//	,L.Cessazione \
-//	,CASE WHEN P.Nominativo IS NOT NULL \
-//	 THEN P.Nominativo \
-//	 ELSE (CASE WHEN LPE.Nominativo IS NOT NULL THEN LPE.Nominativo ELSE '' END) \
-//	 END AS Nominativo \
-//	,CASE \
-//	 WHEN G.idFasciaOrariaForzata IS NOT NULL \
-//	 THEN G.idFasciaOrariaForzata \
-//	 ELSE (CASE WHEN GPF.idFasciaOraria IS NOT NULL THEN GpF.idFasciaOraria ELSE dbo.F_Lav_IDFasciaTeorica(L.idLavoratore,CAL.Giorno) END) \
-//	 END AS Fascia \
-//	,FO.CodiceFascia \
-//	,FO.Descrizione \
-//	,CASE WHEN FO.CodAlternativo IS NOT NULL \
-//	 THEN FO.CodAlternativo \
-//	 ELSE '' \
-//	 END AS Turno \
-//	FROM \
-//	Lavoratori L \
-//	INNER JOIN Ditte D \
-//	ON L.idDitta = D.idDitta \
-//	LEFT JOIN dbo.UF_ElencoGiorniPeriodo(?,?}) CAL \
-//	ON CAL.Giorno > L.Assunzione \
-//	LEFT OUTER JOIN E2Giornaliera G \
-//	ON G.Giorno = CAL.Giorno AND G.idDip = L.idLavoratore \
-//	LEFT OUTER JOIN E2GiornalieraProgFasce GPF \
-//	ON GPF.Giorno = CAL.Giorno AND GPF.idDip = L.idLavoratore \
-//	LEFT JOIN E2FO_FasceOrarie FO \
-//	ON FO.idFasciaOraria = (CASE \
-//	 WHEN G.idFasciaOrariaForzata IS NOT NULL \
-//	 THEN G.idFasciaOrariaForzata \
-//	 ELSE (CASE WHEN GPF.idFasciaOraria IS NOT NULL THEN GpF.idFasciaOraria ELSE dbo.F_Lav_IDFasciaTeorica(L.idLavoratore,CAL.Giorno) END) \
-//	 END) \
-//	LEFT OUTER JOIN Persone P \
-//	ON L.CodiceFiscale = P.CodiceFiscale \
-//	LEFT OUTER JOIN Lavoratori_PersoneEsterne LPE \
-//	ON L.idLavoratore = LPE.idLavoratore \
-//	WHERE CAL.Giorno BETWEEN ? AND ? \
-//	AND L.idLavoratore IN (" + arrLavoratori.map(function(l){return l}).join(',') + ") \
-//	AND L.Assunzione < ? AND (Cessazione IS NULL OR Cessazione > ?) \
-//	ORDER BY Nominativo,CAL.Giorno"; 
-//	
-//	var arrRiepilogoFasce = [dal,al,dal,al,al,dal];
-//	var dsRiepilogoFasce = databaseManager.getDataSetByQuery(globals.Server.MA_PRESENZE,sqlRiepilogoFasce,arrRiepilogoFasce,-1);
-//
-//	return dsRiepilogoFasce;
 }
 
 /**
@@ -771,7 +718,8 @@ function exportReportRiepilogoTurniDip(params)
 							  pqualifica : params['groupqualifica'],
 							  pposinps   : params['groupposizioneinps'],
 							  psedelavoro : params['groupsedelavoro'],
-							  pclassificazione : params['groupclassificazione']
+							  pclassificazione : params['groupclassificazione'],
+							  pdettclassificazione : params['']
 						  };
 		
 		/**
@@ -832,7 +780,8 @@ function exportReportRiepilogoTurni(params)
 		
 		// ottenimento del dataset
 		var ds = globals.ottieniDatasetRiepilogoFasce(params.iddipendenti,params.dalladata,params.alladata,
-			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,params.groupclassificazione);
+			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,
+													  params.groupraggruppamento,params.groupclassificazione);
 		
 		operation.op_message = 'Generazione del report in corso...';
 		operation.op_progress = 75;
@@ -918,10 +867,12 @@ function exportExcelRiepilogoTurni(params)
 		//  apertura form storico senza necessariamente aprire il program relativo (molto più snello)	
 		globals.ma_utl_showFormInDialog(frm.controller.getName(), 'Avanzamento stato operazione');		
 		
+		params.iddipendenti = scopes.lavoratori.sortByNominativo(params.iddipendenti);
+		
 		// ottenimento del dataset
 		var ds = globals.ottieniDatasetRiepilogoFasce(params.iddipendenti,params.dalladata,params.alladata,
-			                                          params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,params.groupclassificazione);
-		// TODO ordinamento ???
+													  params.groupcontratto,params.groupqualifica,params.groupposizioneinps,params.groupsedelavoro,
+													  params.groupraggruppamento,params.groupclassificazione);
 		
 		// definizione delle colonne e dei tipi del dataset
 		var colTypes = [JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.NUMBER,JSColumn.TEXT,JSColumn.NUMBER,JSColumn.DATETIME,JSColumn.DATETIME,JSColumn.TEXT,

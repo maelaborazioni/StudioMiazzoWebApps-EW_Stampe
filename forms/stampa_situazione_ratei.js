@@ -36,7 +36,6 @@ function stampaSituazioneRatei(event)
 	
 	var params = forms.stampa_situazione_ratei_opzioni.getOptions();
 		params['idditta'] = idditta;
-		params['iddipendenti'] = scopes.lavoratori.sortByNominativo(iddipendenti,foundset.tipologia);
 		params['bexcel'] = vFormat;
 		params['groupcontratto'] = forms.stampa_filtri_anagrafici.vGroupContratto;
 		params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
@@ -45,6 +44,8 @@ function stampaSituazioneRatei(event)
 		params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
 		params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
 	
+		params['iddipendenti'] = params['groupraggruppamento'] ? scopes.lavoratori.sortByRaggruppamentoDettaglio(iddipendenti) : scopes.lavoratori.sortByNominativo(iddipendenti);
+		
 	var url = globals.WS_REPORT_URL + (globals.WS_DOTNET_CASE == globals.WS_DOTNET.CORE ? "/Report" : "/Stampe") + "/StampaSituazioneRatei";
 	globals.addJsonWebServiceJob(url, params);
 	  

@@ -13,10 +13,9 @@ var params = null;
 function stampaStatisticaTurni(event) {
 	
 	var _frmOpt = forms.stampa_statistica_turni_opzioni;
-	
-	var iddipendenti = globals.getLavoratoriDittaDalAl(globals.foundsetToArray(foundset,'idditta'),
-											           forms.stampa_statistica_turni_opzioni.vDallaData,
-													   forms.stampa_statistica_turni_opzioni.vAllaData);;
+	var fs = getLavoratori(forms.stampa_statistica_turni_opzioni.vDallaData, forms.stampa_statistica_turni_opzioni.vAllaData);
+	var iddipendenti = globals.foundsetToArray(fs,'idlavoratore');
+
 	if (!iddipendenti || iddipendenti.length === 0)
 		return false;
 
@@ -28,8 +27,10 @@ function stampaStatisticaTurni(event) {
 	params['groupqualifica'] = forms.stampa_filtri_anagrafici.vGroupQualifica;
 	params['groupposizioneinps'] = forms.stampa_filtri_anagrafici.vGroupPosizioneinps;
 	params['groupsedelavoro'] = forms.stampa_filtri_anagrafici.vGroupSedelavoro;
+	params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
 	params['groupclassificazione'] = forms.stampa_filtri_anagrafici.vIdDittaClassificazione;
-	//params['groupraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
+	params['descraggruppamento'] = forms.stampa_filtri_anagrafici.vGroupRaggruppamento;
+	params['groupraggrdettagli'] = forms.stampa_filtri_anagrafici.vRaggruppamentiDettaglio;
 	//params['grouptiporaggruppamento'] = forms.stampa_filtri_anagrafici.vRaggruppamentoCodice;
 	
 	return true;
@@ -71,26 +72,9 @@ function process_conferma_stampa_statistica_turni(event)
 			else if(params.suddivisioneperdipendente)
 				exportReport(event,globals.exportReportRiepilogoTurniDip);
 			else
-				exportReport(event,globals.exportReportRiepilogoTurni);
-			
+				exportReport(event,globals.exportReportRiepilogoTurni);			
 		}
 		else throw new Error('Verificare i parametri della selezione');
-		
-//		if(proceed)
-//		{	
-//			globals.ma_utl_setStatus(globals.Status.BROWSE,controller.getName());
-//			globals.svy_mod_closeForm(event);
-//			
-//			if(params.bexcel)
-//				globals.exportExcelRiepilogoTurni(params);
-//			else
-//			{
-//				if(params.suddivisioneperdipendente)
-//					globals.exportReportRiepilogoTurniDip(params);
-//				else
-//					globals.exportReportRiepilogoTurni(params);
-//			}			
-//		}
 	}
 	catch(ex)
 	{
@@ -105,7 +89,6 @@ function process_conferma_stampa_statistica_turni(event)
 }
 
 /**
- * TODO generated, please specify type and doc for the params
  * @param {JSEvent} event
  * @param {Function} method
  * 
@@ -146,7 +129,6 @@ function exportReport(event,method)
 }
 
 /**
- * TODO generated, please specify type and doc for the params
  * @param event
  *
  * @properties={typeid:24,uuid:"2F3B2A47-2408-4062-A283-A356ACF64D88"}
@@ -199,7 +181,6 @@ function FiltraDipStatistica(_fs)
 	_fs.addFoundSetFilterParam('assunzione','^||<=',_frmOpt.vAllaData);
 	_fs.addFoundSetFilterParam('cessazione','^||>=',_frmOpt.vDallaData);
 	_fs.addFoundSetFilterParam('idditta','IN', globals.foundsetToArray(foundset,'idditta'));
-	//_fs.addFoundSetFilterParam('idditta','IN',idditta);
 	
 	return _fs;
 }
