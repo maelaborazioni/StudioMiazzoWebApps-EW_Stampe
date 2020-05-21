@@ -472,11 +472,13 @@ function createExcelFile(dittaID, dateTo, operation)
 		sqlArr.push(idditta);
 		
 		if(frmAnag.vFilterContratto )
-			strSQL = strSQL + " AND L.RadiceContratto IN (" + frmAnag.vContratto.join(',') + ")";
+			strSQL = strSQL + " AND L.CodContratto IN (" + frmAnag.vContratto.join(',') + ")";
 		
 		if(frmAnag.vFilterQualifica)
-			strSQL = strSQL + " AND L.CodQualifica IN (" + frmAnag.vQualifica.join(',') + ")";
-		
+		{
+			var vQualificaFormat = frmAnag.vQualifica.map(function qualifica(qual){return '\'' + qual + '\''});
+			strSQL = strSQL + " AND L.CodQualifica IN (" + vQualificaFormat.join(',') + ")";
+		}
 		if(frmAnag.vFilterPosizioneInps)
 			strSQL = strSQL + " AND L.PosizioneInps IN (" + frmAnag.vPosizioniInps.join(',') + ")";
 		
