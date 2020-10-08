@@ -36,7 +36,7 @@ function stampaCartolinaPresenze()
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 		
-    var url = globals.WS_REPORT + "/Report32/StampaCartolinaPresenze";
+    var url = globals.WS_REPORT + "/Report32/PresencesAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

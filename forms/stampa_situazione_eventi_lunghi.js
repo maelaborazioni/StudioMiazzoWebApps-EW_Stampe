@@ -29,7 +29,7 @@ function stampaSituazioneEventiLunghi()
 	/**
 	 * Launch the operation and close the window
 	 */
-    var url = globals.WS_REPORT + "/Report32/StampaSituazioneEventiLunghiAsync";
+    var url = globals.WS_REPORT + "/Report32/CertificatesAsync";
     globals.addJsonWebServiceJob(url, params);
     
     return true;

@@ -63,7 +63,7 @@ function stampaPresentiAssenti()
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 	
-	var url = globals.WS_REPORT + "/Report32/StampaPresentiAssentiAsync";
+	var url = globals.WS_REPORT + "/Report32/PresencesInBaseAsync";
 	globals.addJsonWebServiceJob(url,params);
 	
 	return true;

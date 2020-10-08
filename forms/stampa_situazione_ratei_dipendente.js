@@ -73,7 +73,7 @@ function stampaSituazioneRateiDipendente(event)
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 	
-	var url = globals.WS_REPORT + "/Report32/StampaSituazioneRateiAsync";
+	var url = globals.WS_REPORT + "/Report32/RateSituationAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

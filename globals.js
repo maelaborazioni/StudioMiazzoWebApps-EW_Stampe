@@ -242,6 +242,18 @@ function selezione_ditta_stampa_esportazione_timbrature(event)
 }
 
 /**
+ * Mostra la selezione dei parametri per l'esportazione delle timbrature
+ * 
+ * @param {JSEvent} event
+ *
+ * @properties={typeid:24,uuid:"8E6E7DF8-5CCB-463A-A4BF-A1D6DE99BD80"}
+ */
+function selezione_ditta_stampa_esportazione_statistica_homeworking(event)
+{
+	seleziona_ditta_stampa(forms.stampa_esportazione_homeworking.controller.getName(),'Esportazione statistica homeworking');
+}
+
+/**
  * Stampa la giornaliera 
  * 
  * @param 			  params
@@ -261,7 +273,7 @@ function stampaGiornalieraDitta(params, callback)
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 	
-	var url = WS_REPORT + "/Report32/StampaGiornalieraAsync";
+	var url = WS_REPORT + "/Report32/CalendarsAsync";
 	addJsonWebServiceJob(url, params, null, null, callback);
 }
 
@@ -288,7 +300,7 @@ function stampaCertificati(params, callback)
 	/**
 	 * Launch the operation and close the window
 	 */
-    var url = WS_REPORT + "/Report32/StampaSituazioneEventiLunghiAsync";
+    var url = WS_REPORT + "/Report32/CertificatesAsync";
     globals.addJsonWebServiceJob(url, params, null, null, callback);
 }
 
@@ -893,7 +905,7 @@ function exportExcelRiepilogoTurni(params)
  */
 function stampaGiornalieraDittaSync(params)
 {
-	var url = WS_REPORT + "/Report32/StampaGiornalieraSync";
+	var url = WS_REPORT + "/Report32/CalendarsSync";
 	return getWebServiceResponse(url, params);
 }
 
@@ -904,6 +916,6 @@ function stampaGiornalieraDittaSync(params)
  */
 function stampaCertificatiSync(params)
 {
-	var url = WS_REPORT + "/Report32/StampaSituazioneEventiLunghiSync";
+	var url = WS_REPORT + "/Report32/CertificatesSync";
     return globals.getWebServiceResponse(url, params);
 }

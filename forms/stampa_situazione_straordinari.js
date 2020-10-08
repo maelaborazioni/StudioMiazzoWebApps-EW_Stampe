@@ -69,7 +69,7 @@ function stampaSituazioneStraordinari(event) {
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 	
-	var url = globals.WS_REPORT + "/Report32/StampaStatisticaOre";
+	var url = globals.WS_REPORT + "/Report32/HourStatisticsAsync";
 	
 	globals.addJsonWebServiceJob(url, params);
 	

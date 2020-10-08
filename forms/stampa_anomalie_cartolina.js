@@ -66,7 +66,7 @@ function confermaStampaAnomalieCartolina(event)
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 	
-    var url = globals.WS_REPORT + "/Report32/StampaAnomalieTimbratureAsync";
+    var url = globals.WS_REPORT + "/Report32/StampingAnomaliesAsync";
     globals.addJsonWebServiceJob(url,params);
 }
 

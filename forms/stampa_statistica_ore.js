@@ -73,7 +73,7 @@ function stampaStatisticaOre(event) {
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 	
-	var url = globals.WS_REPORT + "/Report32/StampaStatisticaOreAsync";
+	var url = globals.WS_REPORT + "/Report32/HourStatisticsAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

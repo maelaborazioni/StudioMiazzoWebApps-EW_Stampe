@@ -59,7 +59,8 @@ function onShowForm(firstShow, event, svyNavBaseOnShow)
 {
 	plugins.busy.prepare();
 	
-	elements.opzioni_panel.tabIndex = 'opzioni_tab';
+	if(elements.opzioni_panel)
+		elements.opzioni_panel.tabIndex = 'opzioni_tab';
 	
 	var frmFtrAnag = forms.stampa_filtri_anagrafici;
 	if(fromGiornaliera)
@@ -88,8 +89,9 @@ function onShowForm(firstShow, event, svyNavBaseOnShow)
 function gotoEdit()
 {
 	_super.gotoEdit();
-	for(var t = 1; t <= elements.opzioni_panel.getMaxTabIndex(); t++)
-		globals.ma_utl_setStatus(globals.Status.EDIT, elements.opzioni_panel.getTabFormNameAt(t));
+	if(elements.opzioni_panel)
+		for(var t = 1; t <= elements.opzioni_panel.getMaxTabIndex(); t++)
+			globals.ma_utl_setStatus(globals.Status.EDIT, elements.opzioni_panel.getTabFormNameAt(t));
 }
 
 /**
@@ -98,8 +100,9 @@ function gotoEdit()
 function gotoBrowse()
 {
 	_super.gotoBrowse();
-	for(var t = 1; t <= elements.opzioni_panel.getMaxTabIndex(); t++)
-		globals.ma_utl_setStatus(globals.Status.BROWSE, elements.opzioni_panel.getTabFormNameAt(t));
+	if(elements.opzioni_panel)
+		for(var t = 1; t <= elements.opzioni_panel.getMaxTabIndex(); t++)
+			globals.ma_utl_setStatus(globals.Status.BROWSE, elements.opzioni_panel.getTabFormNameAt(t));
 }
 
 /**

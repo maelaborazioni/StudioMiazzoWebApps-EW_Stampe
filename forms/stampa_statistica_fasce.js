@@ -35,7 +35,7 @@ function stampaStatisticaFasce(event) {
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 	
-	var url = globals.WS_REPORT + "/Report32/StampaStatisticaFasceAsync";
+	var url = globals.WS_REPORT + "/Report32/ShiftStatisticsAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

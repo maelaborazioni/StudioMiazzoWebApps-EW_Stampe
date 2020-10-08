@@ -490,7 +490,7 @@ function updateQualifica(records)
 		);
 		
 		vQualificaString = temp.join('\n');
-		vQualifica = records.map(function(record){ return record.radicequalifica; });
+		vQualifica = records.map(function(record){ return '\'' + record.radicequalifica + '\''; });
 	}
 }
 

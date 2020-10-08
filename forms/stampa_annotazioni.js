@@ -29,7 +29,7 @@ function stampaAnnotazioni()
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
 		
-	var url = globals.WS_REPORT + "/Report32/StampaAnnotazioniDipendentiAsync";
+	var url = globals.WS_REPORT + "/Report32/AnnotationsAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;

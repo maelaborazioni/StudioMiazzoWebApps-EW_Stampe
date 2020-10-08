@@ -97,7 +97,7 @@ function process_conferma_stampa_cartolina_dipendente(event)
 		globals.ma_utl_setStatus(globals.Status.BROWSE,controller.getName());
 		globals.svy_mod_closeForm(event);
 		
-		var url = globals.WS_REPORT + "/Report32/StampaCartolinaPresenzeAsync";
+		var url = globals.WS_REPORT + "/Report32/PresencesAsync";
 		globals.addJsonWebServiceJob(url, params);
 	}
 	catch(ex)

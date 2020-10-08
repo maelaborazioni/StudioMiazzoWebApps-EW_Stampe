@@ -40,7 +40,7 @@ function stampaStatisticaEventi(event) {
 	}
 	params.operationid = operation.operationId;
 	params.operationhash = operation.operationHash;
-	var url = globals.WS_REPORT + "/Report32/StampaStatisticaEventiAsync";
+	var url = globals.WS_REPORT + "/Report32/EventStatisticsAsync";
 	globals.addJsonWebServiceJob(url, params);
 	
 	return true;
